@@ -64,7 +64,7 @@ export function Footer() {
             className={`text-sm text-muted-foreground fade-in-from-bottom
               ${getDelayClass(4)}`}
           >
-            © {new Date().getFullYear()} Web8th. All rights reserved.
+            © {new Date().getFullYear()} Matthew Tseng. All rights reserved.
           </div>
         </div>
       </div>
