@@ -9,8 +9,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useMobileDevice } from '@/hooks/use-mobile-device';
 import type { CollectionImage } from '@/lib/types';
 import { getDelayClass } from '@/utils/animations';
+import {
+  getMasonryColumnCount,
+  packMasonryColumns,
+  type MasonryBreakpointCols,
+} from '@/utils/masonry';
 import { ImageOff, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Masonry from 'react-masonry-css';
 
 interface ImagesGridProps {
@@ -28,6 +33,13 @@ interface ImagesGridProps {
   disableDownload?: boolean;
   selectedIds?: Set<string>;
   onSelectionChange?: (selected: Set<string>) => void;
+}
+
+function imageSrc(image: CollectionImage, isDrive: boolean) {
+  if (!image.image_url) return null;
+  return isDrive
+    ? `/api/v1/proxy-image?url=${encodeURIComponent(image.image_url)}`
+    : image.image_url;
 }
 
 export function ImagesGrid({
@@ -48,6 +60,8 @@ export function ImagesGrid({
 }: ImagesGridProps) {
   const { isAuthenticated } = useAuth();
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [aspectById, setAspectById] = useState<Record<string, number>>({});
+  const [viewportWidth, setViewportWidth] = useState(1280);
   const isMobile = useIsMobile(); // For UI interactions
   const isMobileDevice = useMobileDevice(); // For feature detection
 
@@ -57,6 +71,68 @@ export function ImagesGrid({
   // Show selection UI only if not on a mobile device and user can download OR delete
   const canSelectImages =
     !isMobileDevice && (!disableDownload || (isAuthenticated && isUploaded));
+
+  const breakpointCols: MasonryBreakpointCols = useMemo(
+    () => ({
+      default: maxColumns,
+      1280: Math.min(maxColumns, 4),
+      1024: Math.min(maxColumns, 3),
+      768: 2,
+      640: 1,
+    }),
+    [maxColumns]
+  );
+
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  // Prefetch intrinsic ratios so packing matches rendered photo heights
+  useEffect(() => {
+    let cancelled = false;
+
+    images.forEach((image) => {
+      const src = imageSrc(image, isDrive);
+      if (!src) return;
+
+      const img = new window.Image();
+      img.onload = () => {
+        if (cancelled || !img.naturalWidth) return;
+        const ratio = img.naturalHeight / img.naturalWidth;
+        setAspectById((prev) => {
+          if (prev[image.id] === ratio) return prev;
+          return { ...prev, [image.id]: ratio };
+        });
+      };
+      img.src = src;
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [images, isDrive]);
+
+  const columnCount = getMasonryColumnCount(breakpointCols, viewportWidth);
+
+  const originalIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    images.forEach((image, index) => map.set(image.id, index));
+    return map;
+  }, [images]);
+
+  // Pack by height, then hand Masonry one child per column (keeps that packing)
+  const masonryColumns = useMemo(
+    () =>
+      packMasonryColumns(
+        images,
+        columnCount,
+        (image) => aspectById[image.id] ?? 1
+      ),
+    [images, columnCount, aspectById]
+  );
 
   const handleImageError = (imageId: string) => {
     setFailedImages((prev) => new Set(prev).add(imageId));
@@ -96,6 +172,82 @@ export function ImagesGrid({
     }
   };
 
+  const renderImageCard = (image: CollectionImage) => {
+    const originalIndex = originalIndexById.get(image.id) ?? 0;
+    const globalIndex = isDrive ? startIndex + originalIndex : originalIndex;
+    const hasFailed = failedImages.has(image.id);
+    const src = imageSrc(image, isDrive);
+
+    return (
+      <div
+        key={image.id}
+        className={`group relative mb-4 overflow-hidden rounded ${
+          isMobile ? '' : 'cursor-pointer'
+        } fade-in-from-top
+        ${getDelayClass(globalIndex)}`}
+        onClick={isMobile ? undefined : () => onImageClick(globalIndex)}
+      >
+        <div className='relative overflow-hidden'>
+          {hasFailed && isDrive ? (
+            <div
+              className='flex h-64 flex-col items-center justify-center gap-2
+                bg-muted rounded'
+            >
+              <ImageOff className='w-8 h-8 text-muted-foreground' />
+              <Text variant='muted-sm'>Failed to load</Text>
+            </div>
+          ) : src ? (
+            <OptimizedImage
+              src={src}
+              alt={`${collectionTitle} - ${isDrive ? 'Google Drive Photo' : 'Photo'} ${originalIndex + 1}`}
+              width={800}
+              height={600}
+              className='w-full h-auto rounded hover:scale-105 transition-transform
+                duration-300'
+              sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+              loading='lazy'
+              showLoading='spinner-only'
+              onError={() => handleImageError(image.id)}
+            />
+          ) : (
+            <div className='flex h-64 items-center justify-center bg-muted rounded'>
+              <Text variant='muted'>No image</Text>
+            </div>
+          )}
+
+          {canSelectImages && (
+            <div className='absolute top-2 left-2 z-10'>
+              <Checkbox
+                checked={selectedIds.has(image.id)}
+                onCheckedChange={(checked) =>
+                  handleSelectOne(image.id, checked as boolean)
+                }
+                disabled={isBulkDeleting}
+                variant='overlay'
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CheckboxIndicator />
+              </Checkbox>
+            </div>
+          )}
+
+          {isAuthenticated && isUploaded && (
+            <div className='absolute top-2 right-2 z-10'>
+              <Button
+                variant='destructive'
+                size='icon'
+                onClick={(e) => handleDeleteClick(e, image.id)}
+                disabled={isDeletingImage || isBulkDeleting}
+              >
+                <Trash2 />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className='space-y-6'>
       {/* Title for Drive images */}
@@ -122,7 +274,6 @@ export function ImagesGrid({
             <Text variant='bd-sm'>Select All</Text>
           </label>
           <div className='flex gap-2'>
-            {/* Delete button - only for authenticated users on uploaded images */}
             {isAuthenticated && isUploaded && selectedIds.size > 0 && (
               <Button
                 variant='destructive'
@@ -159,97 +310,17 @@ export function ImagesGrid({
         </div>
       )}
 
-      {/* Images Grid */}
+      {/* One Masonry child per column so round-robin preserves height packing */}
       <Masonry
-        breakpointCols={{
-          default: maxColumns,
-          1280: Math.min(maxColumns, 4),
-          1024: Math.min(maxColumns, 3),
-          768: 2,
-          640: 1,
-        }}
+        breakpointCols={columnCount}
         className='masonry-grid'
         columnClassName='masonry-grid_column'
       >
-        {images.map((image, index) => {
-          const globalIndex = isDrive ? startIndex + index : index;
-          const hasFailed = failedImages.has(image.id);
-
-          return (
-            <div
-              key={image.id}
-              className={`group relative overflow-hidden rounded ${
-                isMobile ? '' : 'cursor-pointer'
-              } fade-in-from-top
-              ${getDelayClass(globalIndex)}`}
-              onClick={isMobile ? undefined : () => onImageClick(globalIndex)}
-            >
-              <div className='relative overflow-hidden'>
-                {hasFailed && isDrive ? (
-                  <div
-                    className='flex h-64 flex-col items-center justify-center gap-2
-                      bg-muted rounded'
-                  >
-                    <ImageOff className='w-8 h-8 text-muted-foreground' />
-                    <Text variant='muted-sm'>Failed to load</Text>
-                  </div>
-                ) : image.image_url ? (
-                  <OptimizedImage
-                    src={
-                      isDrive
-                        ? `/api/v1/proxy-image?url=${encodeURIComponent(image.image_url)}`
-                        : image.image_url
-                    }
-                    alt={`${collectionTitle} - ${isDrive ? 'Google Drive Photo' : 'Photo'} ${index + 1}`}
-                    width={800}
-                    height={600}
-                    className='w-full h-auto rounded hover:scale-105 transition-transform
-                      duration-300'
-                    sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
-                    loading='lazy'
-                    showLoading='spinner-only'
-                    onError={() => handleImageError(image.id)}
-                  />
-                ) : (
-                  <div className='flex h-64 items-center justify-center bg-muted rounded'>
-                    <Text variant='muted'>No image</Text>
-                  </div>
-                )}
-
-                {/* Checkbox - Visible only if user can download or delete */}
-                {canSelectImages && (
-                  <div className='absolute top-2 left-2 z-10'>
-                    <Checkbox
-                      checked={selectedIds.has(image.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectOne(image.id, checked as boolean)
-                      }
-                      disabled={isBulkDeleting}
-                      variant='overlay'
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <CheckboxIndicator />
-                    </Checkbox>
-                  </div>
-                )}
-
-                {/* Individual Delete button - Only for authenticated users on uploaded images */}
-                {isAuthenticated && isUploaded && (
-                  <div className='absolute top-2 right-2 z-10'>
-                    <Button
-                      variant='destructive'
-                      size='icon'
-                      onClick={(e) => handleDeleteClick(e, image.id)}
-                      disabled={isDeletingImage || isBulkDeleting}
-                    >
-                      <Trash2 />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {masonryColumns.map((columnImages, columnIndex) => (
+          <div key={`masonry-col-${columnIndex}`}>
+            {columnImages.map((image) => renderImageCard(image))}
+          </div>
+        ))}
       </Masonry>
     </div>
   );
