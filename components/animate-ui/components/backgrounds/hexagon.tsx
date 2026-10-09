@@ -10,6 +10,19 @@ type HexagonBackgroundProps = React.ComponentProps<'div'> & {
   hexagonMargin?: number;
 };
 
+function subscribe(onStoreChange: () => void) {
+  window.addEventListener('resize', onStoreChange);
+  return () => window.removeEventListener('resize', onStoreChange);
+}
+
+function getViewportSnapshot() {
+  return `${window.innerWidth}x${window.innerHeight}`;
+}
+
+function getServerViewportSnapshot() {
+  return '0x0';
+}
+
 function HexagonBackground({
   className,
   children,
@@ -26,22 +39,19 @@ function HexagonBackground({
   const oddRowMarginLeft = -(hexagonSize / 2);
   const evenRowMarginLeft = hexagonMargin / 2;
 
-  const [gridDimensions, setGridDimensions] = React.useState({
-    rows: 0,
-    columns: 0,
-  });
+  const viewport = React.useSyncExternalStore(
+    subscribe,
+    getViewportSnapshot,
+    getServerViewportSnapshot
+  );
 
-  const updateGridDimensions = React.useCallback(() => {
-    const rows = Math.ceil(window.innerHeight / rowSpacing);
-    const columns = Math.ceil(window.innerWidth / hexagonWidth) + 1;
-    setGridDimensions({ rows, columns });
-  }, [rowSpacing, hexagonWidth]);
-
-  React.useEffect(() => {
-    updateGridDimensions();
-    window.addEventListener('resize', updateGridDimensions);
-    return () => window.removeEventListener('resize', updateGridDimensions);
-  }, [updateGridDimensions]);
+  const gridDimensions = React.useMemo(() => {
+    const [width, height] = viewport.split('x').map(Number);
+    return {
+      rows: Math.ceil(height / rowSpacing),
+      columns: Math.ceil(width / hexagonWidth) + 1,
+    };
+  }, [viewport, rowSpacing, hexagonWidth]);
 
   return (
     <div

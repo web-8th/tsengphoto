@@ -66,12 +66,19 @@ export function SearchAndFilterBar<T>({
 }: SearchAndFilterBarProps<T>) {
   // Use local state for immediate UI updates, sync with props
   const [localSearchQuery, setLocalSearchQuery] = useState(propSearchQuery);
+  const [prevPropSearchQuery, setPrevPropSearchQuery] = useState(propSearchQuery);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(localSearchQuery, 300);
   const prevQueryRef = useRef<string | undefined>(undefined);
   const prevTypeFilterRef = useRef<string | null | undefined>(undefined);
   const prevGroupFilterRef = useRef<string | null | undefined>(undefined);
   const prevItemsRef = useRef<T[] | undefined>(undefined);
+
+  // Adjust local state when the prop changes externally (React-recommended pattern)
+  if (propSearchQuery !== prevPropSearchQuery) {
+    setPrevPropSearchQuery(propSearchQuery);
+    setLocalSearchQuery(propSearchQuery);
+  }
 
   const fuse = useMemo(() => {
     return new Fuse(items, {
@@ -81,11 +88,6 @@ export function SearchAndFilterBar<T>({
       minMatchCharLength: 2,
     });
   }, [items, searchKeys]);
-
-  // Sync local search with prop when prop changes externally
-  useEffect(() => {
-    setLocalSearchQuery(propSearchQuery);
-  }, [propSearchQuery]);
 
   // Sync debounced query to URL via callback
   useEffect(() => {

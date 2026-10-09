@@ -105,7 +105,8 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return;
-    onSelect(api);
+    // Sync scroll state with Embla (external store); defer to avoid sync setState-in-effect
+    queueMicrotask(() => onSelect(api));
     api.on('reInit', onSelect);
     api.on('select', onSelect);
 
@@ -271,8 +272,11 @@ function CarouselDots({ className, ...props }: React.ComponentProps<'div'>) {
 
   React.useEffect(() => {
     if (!api) return;
-    onInit(api);
-    onSelect(api);
+    // Sync dots with Embla (external store); defer to avoid sync setState-in-effect
+    queueMicrotask(() => {
+      onInit(api);
+      onSelect(api);
+    });
     api.on('reInit', onInit);
     api.on('reInit', onSelect);
     api.on('select', onSelect);

@@ -95,12 +95,12 @@ export async function GET() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.from('uploads').select('*');
-    
+
     if (error) {
       Logger.error('Error fetching uploads:', error);
       return NextResponse.json({ error: 'Something went wrong.' }, { status: 500 });
     }
-    
+
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
     Logger.error('Unexpected error:', error);
@@ -192,11 +192,11 @@ import CollectionLoading from './loading';
 
 export default function CollectionPage() {
   const { data, isLoading } = useQuery({ ... });
-  
+
   if (isLoading) {
     return <CollectionLoading />;
   }
-  
+
   // render page with data...
 }
 
@@ -259,7 +259,9 @@ const { isLoading } = useQuery({ ... });
 // From TanStack Query mutation
 <Button disabled={mutation.isPending || mutation.isSuccess}>
   {mutation.isPending || mutation.isSuccess ? (
-    <><Spinner /> Saving...</>
+    <>
+      <Spinner /> Saving...
+    </>
   ) : (
     'Save'
   )}
@@ -371,13 +373,13 @@ const deleteMutation = useMutation({
 mutationFn: async () => {
   const result = await signInWithEmail(email, password);
   return result;
-}
+};
 
 //  Throw to trigger onError
 mutationFn: async () => {
   const result = await signInWithEmail(email, password);
   if (result.error) throw new Error('Invalid credentials.');
-}
+};
 ```
 
 #### Loading & Success States
@@ -409,7 +411,7 @@ const queryClient = useQueryClient();
 
 onSuccess: () => {
   queryClient.invalidateQueries({ queryKey: queryKeys.uploads });
-}
+};
 ```
 
 #### Integration with React Hook Form
@@ -426,11 +428,11 @@ onError: (error: Error) => {
 Display root errors below your fields:
 
 ```tsx
-{form.formState.errors.root && (
-  <div className='text-sm text-destructive'>
-    {form.formState.errors.root.message}
-  </div>
-)}
+{
+  form.formState.errors.root && (
+    <div className='text-sm text-destructive'>{form.formState.errors.root.message}</div>
+  );
+}
 ```
 
 #### General Rules
@@ -570,7 +572,7 @@ Logger.debug('Payload', payload);
 //  Correct
 <div>
   <Button onClick={openAddDialog}>Add New Collection</Button>
-  
+
   {collections.map(collection => (
     <Card key={collection.id}>
       {/* ... */}
@@ -600,16 +602,14 @@ interface CollectionFormProps {
 
 export function CollectionForm({ mode, collection, onSuccess }: CollectionFormProps) {
   const form = useForm({
-    defaultValues: collection || { /* empty defaults */ },
+    defaultValues: collection || {/* empty defaults */},
   });
-  
+
   return (
     <Form>
       <DialogTitle>{mode === 'add' ? 'Add Collection' : 'Edit Collection'}</DialogTitle>
       {/* form fields */}
-      <Button type="submit">
-        {mode === 'add' ? 'Create' : 'Update'}
-      </Button>
+      <Button type='submit'>{mode === 'add' ? 'Create' : 'Update'}</Button>
     </Form>
   );
 }
@@ -623,9 +623,9 @@ Spawn add/edit forms in a **Dialog** (simple forms) or **Sheet** (longer forms) 
 //  Use Dialog for simple forms
 <Dialog open={isOpen} onOpenChange={setIsOpen}>
   <DialogContent>
-    <CollectionForm mode="add" onSuccess={() => setIsOpen(false)} />
+    <CollectionForm mode='add' onSuccess={() => setIsOpen(false)} />
   </DialogContent>
-</Dialog>
+</Dialog>;
 
 //  Don't navigate to separate pages for simple CRUD
 router.push('/collections/new');

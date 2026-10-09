@@ -24,7 +24,7 @@ jobs:
     needs: [lint]
     if: always()
     steps:
-    - run: |
-        if [ "${{ needs.lint.result }}" != "success" ]; then
-          exit 1
-        fi
+      - run: |
+          if [ "${{ needs.lint.result }}" != "success" ]; then
+            exit 1
+          fi
