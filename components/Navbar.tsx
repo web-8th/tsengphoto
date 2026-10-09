@@ -151,7 +151,10 @@ export function Navbar() {
     // Touch devices have no hover state — allow click immediately
     if ('pointerType' in e && (e as React.PointerEvent).pointerType === 'touch') return;
     // Block click for 1 second after hover starts (dropdown opens on hover anyway)
-    if (portfolioHoverStartRef.current !== null && Date.now() - portfolioHoverStartRef.current < 1000) {
+    if (
+      portfolioHoverStartRef.current !== null &&
+      Date.now() - portfolioHoverStartRef.current < 1000
+    ) {
       e.preventDefault();
       e.stopPropagation();
     }

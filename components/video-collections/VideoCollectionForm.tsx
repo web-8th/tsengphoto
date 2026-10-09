@@ -258,7 +258,7 @@ export function VideoCollectionForm({
               fileUrl: pendingUrl,
             }),
           });
-        } catch (error) {
+        } catch {
           // Silently fail - don't interrupt dialog close
         }
       }

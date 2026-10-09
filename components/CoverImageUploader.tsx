@@ -42,6 +42,18 @@ interface FileWithStatus {
   originalSize?: number; // Track original file size before compression
 }
 
+function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
+
 export function CoverImageUploader({
   value,
   uploadId,
@@ -241,18 +253,6 @@ export function CoverImageUploader({
       toast.error('Something went wrong while removing the image');
     },
   });
-
-  function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
-    return new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        resolve({ width: img.naturalWidth, height: img.naturalHeight });
-        URL.revokeObjectURL(url);
-      };
-      img.src = url;
-    });
-  }
 
   // If there's already an uploaded image (value), show it
   if (value) {

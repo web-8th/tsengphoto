@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Logger } from '@/lib/logger';
-import {
-  fetchDriveFolderImages,
-  getDriveImageUrl,
-} from '@/utils/google-drive';
+import { fetchDriveFolderImages, getDriveImageUrl } from '@/utils/google-drive';
 import { createClient } from '@/utils/supabase/server';
 
 export async function GET(

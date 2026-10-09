@@ -77,6 +77,10 @@ export default function CollectionPageClient({
   const [downloadDialogOpen, setDownloadDialogOpen] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
+  // Capture once so Date.now isn't called during render (react-hooks/purity)
+  const [initialDataUpdatedAt] = useState(() =>
+    initialCollection ? Date.now() : undefined
+  );
 
   const {
     data: collection,
@@ -101,7 +105,7 @@ export default function CollectionPageClient({
     // initialData seeds the public query key; the auth'd key ([..., {includeUnpublished:true}])
     // is a different entry and will always fetch fresh.
     initialData: initialCollection ?? undefined,
-    initialDataUpdatedAt: initialCollection ? Date.now() : undefined,
+    initialDataUpdatedAt,
   });
 
   // Fetch Google Drive images if collection has a drive_link
