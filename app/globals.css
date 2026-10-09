@@ -62,14 +62,21 @@
   }
 }
 
+/* Official react-masonry-css gutter pattern (percentage widths + padding gutters).
+   Do not use flex `gap` here — it breaks the library's inline width: N% columns. */
 .masonry-grid {
   display: flex;
-  gap: 1rem;
+  margin-left: -1rem;
+  width: auto;
 }
 .masonry-grid_column {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding-left: 1rem;
+  background-clip: padding-box;
+  box-sizing: border-box;
+}
+.masonry-grid_column > * {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 :root {

@@ -65,7 +65,7 @@ export function OptimizedImage({ showLoading = false, ...props }: OptimizedImage
   }
 
   return (
-    <div className='relative w-full h-full'>
+    <div className='relative w-full'>
       {isLoading && (
         <div
           className={`absolute inset-0 z-10 bg-black/50
