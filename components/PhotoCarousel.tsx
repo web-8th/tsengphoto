@@ -13,7 +13,7 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import Autoplay from 'embla-carousel-autoplay';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface PhotoCarouselProps {
   images: string[];
@@ -55,16 +55,45 @@ export function PhotoCarousel({
         ? 'md:basis-1/2'
         : 'md:basis-1/2 lg:basis-1/3';
 
+  // Match the slide widths above so the browser downloads a right-sized image
+  const imageSizes =
+    itemsToShow === 1
+      ? '100vw'
+      : itemsToShow === 2
+        ? '(max-width: 768px) 100vw, 50vw'
+        : '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
+
   const carouselOpts = {
     align: 'start' as const,
     containScroll: 'trimSnaps' as const,
     loop: true,
   };
 
-  // Only use Autoplay plugin if autoplayDelay is greater than 0
-  const plugins = autoplayDelay > 0 ? [Autoplay({ delay: autoplayDelay })] : [];
+  // Only use Autoplay plugin if autoplayDelay is greater than 0.
+  // Autoplay starts once the carousel scrolls into view (see effect below).
+  const plugins = useMemo(
+    () =>
+      autoplayDelay > 0 ? [Autoplay({ delay: autoplayDelay, playOnInit: false })] : [],
+    [autoplayDelay]
+  );
 
   const [api, setApi] = useState<CarouselApi>();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Pause autoplay while the carousel is off-screen so it isn't animating unseen
+  useEffect(() => {
+    const autoplay = api?.plugins().autoplay;
+    const el = sectionRef.current;
+    if (!autoplay || !el) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) autoplay.play();
+      else autoplay.stop();
+    });
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [api]);
 
   useEffect(() => {
     if (!api || !onIndexChange) return;
@@ -73,6 +102,7 @@ export function PhotoCarousel({
 
   return (
     <section
+      ref={sectionRef}
       className={cn(
         !fullWidth && 'container mx-auto',
         itemsToShow === 1 && 'bg-transparent',
@@ -109,6 +139,7 @@ export function PhotoCarousel({
                     src={src}
                     alt={`Image ${index + 1}`}
                     fill
+                    sizes={imageSizes}
                     className={objectFit === 'cover' ? 'object-cover' : 'object-contain'}
                     style={{ objectPosition }}
                     showLoading={showLoading}
@@ -126,6 +157,7 @@ export function PhotoCarousel({
                       src={src}
                       alt={`Image ${index + 1}`}
                       fill
+                      sizes={imageSizes}
                       className={
                         objectFit === 'cover' ? 'object-cover' : 'object-contain'
                       }
