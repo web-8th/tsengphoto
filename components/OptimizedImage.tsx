@@ -65,7 +65,9 @@ export function OptimizedImage({ showLoading = false, ...props }: OptimizedImage
   }
 
   return (
-    <div className='relative w-full'>
+    // `fill` images size to this wrapper, so it needs the parent's height;
+    // intrinsic-size images (masonry grid) must not be stretched by it
+    <div className={`relative w-full ${props.fill ? 'h-full' : ''}`}>
       {isLoading && (
         <div
           className={`absolute inset-0 z-10 bg-black/50
