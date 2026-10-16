@@ -43,6 +43,7 @@ import {
   Type,
   Upload,
 } from 'lucide-react';
+import { fetchImage } from '@/utils/google-drive';
 import { notFound, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { ImagesGrid } from './components/ImagesGrid';
@@ -139,11 +140,12 @@ export default function CollectionPageClient({
     );
   }, [driveImages, collection?.id]);
 
-  // Full quality URLs for viewer (proxied to avoid rate limits)
+  // Full quality URLs for viewer/downloads. Loaded straight from Google; OptimizedImage and
+  // fetchImage fall back to our proxy only if Google rejects the request.
   const driveFullQualityUrls: string[] = useMemo(() => {
     return driveImages.map(
       (img: { id: string; name: string; thumbnailUrl: string; fullQualityUrl: string }) =>
-        `/api/v1/proxy-image?url=${encodeURIComponent(img.fullQualityUrl)}`
+        img.fullQualityUrl
     );
   }, [driveImages]);
 
@@ -160,7 +162,6 @@ export default function CollectionPageClient({
     const uploaded = sortedImages
       .map((img: CollectionImage) => img.image_url)
       .filter(Boolean) as string[];
-    // Use proxied full quality URLs for viewer to avoid rate limits
     return [...uploaded, ...driveFullQualityUrls];
   }, [sortedImages, driveFullQualityUrls]);
 
@@ -310,7 +311,7 @@ export default function CollectionPageClient({
 
   const downloadImage = async (url: string, filename: string) => {
     try {
-      const response = await fetch(url);
+      const response = await fetchImage(url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -419,7 +420,7 @@ export default function CollectionPageClient({
                   try {
                     const filename = `${collection.title.replace(/\s+/g, '_')}_drive_${task.driveIndex + 1}.jpg`;
                     if (zipDownload) {
-                      const response = await fetch(fullQualityUrl);
+                      const response = await fetchImage(fullQualityUrl);
                       const arrayBuffer = await response.arrayBuffer();
                       filesToZip[filename] = new Uint8Array(arrayBuffer);
                     } else {

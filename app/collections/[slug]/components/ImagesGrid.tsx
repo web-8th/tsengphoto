@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useMobileDevice } from '@/hooks/use-mobile-device';
 import type { CollectionImage } from '@/lib/types';
 import { getDelayClass } from '@/utils/animations';
+import { driveImageLoader } from '@/utils/google-drive';
 import {
   getMasonryColumnCount,
   packMasonryColumns,
@@ -35,10 +36,16 @@ interface ImagesGridProps {
   onSelectionChange?: (selected: Set<string>) => void;
 }
 
-function imageSrc(image: CollectionImage, isDrive: boolean) {
+// Drive images load straight from Google (OptimizedImage falls back to the proxy)
+function imageSrc(image: CollectionImage) {
+  return image.image_url;
+}
+
+// Only the aspect ratio is needed, so fetch a tiny Drive rendition instead of the full image
+function ratioProbeSrc(image: CollectionImage, isDrive: boolean) {
   if (!image.image_url) return null;
   return isDrive
-    ? `/api/v1/proxy-image?url=${encodeURIComponent(image.image_url)}`
+    ? driveImageLoader({ src: image.image_url, width: 100 })
     : image.image_url;
 }
 
@@ -95,7 +102,7 @@ export function ImagesGrid({
     let cancelled = false;
 
     images.forEach((image) => {
-      const src = imageSrc(image, isDrive);
+      const src = ratioProbeSrc(image, isDrive);
       if (!src) return;
 
       const img = new window.Image();
@@ -171,7 +178,7 @@ export function ImagesGrid({
     const originalIndex = originalIndexById.get(image.id) ?? 0;
     const globalIndex = isDrive ? startIndex + originalIndex : originalIndex;
     const hasFailed = failedImages.has(image.id);
-    const src = imageSrc(image, isDrive);
+    const src = imageSrc(image);
 
     return (
       <div

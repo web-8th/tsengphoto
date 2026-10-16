@@ -264,7 +264,8 @@ export function UploadsGallery({
                         src={upload.file_url}
                         alt={upload.file_name}
                         fill
-                        quality={70}
+                        // Admin-only preview: don't spend Vercel transformations
+                        unoptimized
                         className='object-cover'
                         showLoading={true}
                       />

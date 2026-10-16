@@ -96,6 +96,51 @@ export function getDriveFullQualityUrl(thumbnailLink: string): string {
   return thumbnailLink.replace(/=s\d+$/, '=d');
 }
 
+const PROXY_IMAGE_PREFIX = '/api/v1/proxy-image?url=';
+
+/**
+ * Get the direct lh3 URL for a Drive image, unwrapping it from our proxy if needed.
+ * Returns null when the src is not a Drive image.
+ */
+export function getDirectDriveUrl(src: string): string | null {
+  const url = src.startsWith(PROXY_IMAGE_PREFIX)
+    ? decodeURIComponent(src.slice(PROXY_IMAGE_PREFIX.length))
+    : src;
+  return url.startsWith('https://lh3.googleusercontent.com/') ? url : null;
+}
+
+/**
+ * Route a Drive image through our proxy (fallback when Google rejects a direct request)
+ */
+export function getDriveProxyUrl(driveUrl: string): string {
+  return `${PROXY_IMAGE_PREFIX}${encodeURIComponent(driveUrl)}`;
+}
+
+/**
+ * Fetch an image's bytes. Drive images come straight from Google (it sends CORS headers),
+ * so they cost no Vercel bandwidth; our proxy is only used if the direct request fails.
+ */
+export async function fetchImage(url: string): Promise<Response> {
+  const driveUrl = getDirectDriveUrl(url);
+  if (!driveUrl) return fetch(url);
+
+  try {
+    const response = await fetch(driveUrl);
+    if (response.ok) return response;
+  } catch {
+    // Network/CORS failure: fall through to the proxy
+  }
+  return fetch(getDriveProxyUrl(driveUrl));
+}
+
+/**
+ * next/image loader that has Google resize Drive images (=w<width>, -rw = WebP),
+ * so they never count against Vercel's image transformation quota
+ */
+export function driveImageLoader({ src, width }: { src: string; width: number }): string {
+  return `${src.replace(/=[^/]*$/, '')}=w${width}-rw`;
+}
+
 /**
  * Get high-quality thumbnail URL from Google Drive
  * Size param can be adjusted (e.g., s1600 for 1600px max dimension, s2048 for 2048px)

@@ -7,6 +7,7 @@ import {
   DialogPortal as DialogPortalPrimitive,
 } from '@/components/animate-ui/primitives/radix/dialog';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
+import { fetchImage } from '@/utils/google-drive';
 import { Download, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -27,7 +28,7 @@ export function ImageViewer({
 
   const handleDownload = async () => {
     const url = images[currentIndex];
-    const response = await fetch(url);
+    const response = await fetchImage(url);
     const blob = await response.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

@@ -53,6 +53,7 @@ export function Footer() {
                 <OptimizedImage
                   src='/rmlogo.png'
                   alt='Logo'
+                  unoptimized
                   className='not-dark:invert-100'
                   width={48}
                   height={48}

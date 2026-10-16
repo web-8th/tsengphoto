@@ -268,8 +268,9 @@ export function CoverImageUploader({
             src={value}
             alt='Cover image'
             fill
+            // Admin-only preview: don't spend Vercel transformations
+            unoptimized
             className='object-cover object-[center_20%]'
-            sizes='(max-width: 768px) 100vw, 600px'
           />
           <div
             className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100

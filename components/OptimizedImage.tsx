@@ -3,6 +3,11 @@ import { Text } from '@/components/Text';
 import { useImageOptimization } from '@/contexts/ImageOptimizationContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getDelayClass } from '@/utils/animations';
+import {
+  driveImageLoader,
+  getDirectDriveUrl,
+  getDriveProxyUrl,
+} from '@/utils/google-drive';
 import { Loader2 } from 'lucide-react';
 import Image, { ImageProps } from 'next/image';
 import { useState } from 'react';
@@ -15,6 +20,7 @@ interface OptimizedImageProps extends ImageProps {
  * Wrapper around Next.js Image that automatically falls back to unoptimized
  * images when Vercel returns 402 (billing limit exceeded).
  * Uses global state to avoid retrying optimization after first 402.
+ * Google Drive images (direct or proxied) bypass Vercel and are resized by Google.
  *
  * @param showLoading - If true, shows a loading spinner and text while the image loads
  */
@@ -22,9 +28,25 @@ export function OptimizedImage({ showLoading = false, ...props }: OptimizedImage
   const { isOptimizationDisabled, disableOptimization } = useImageOptimization();
   const [localUnoptimized, setLocalUnoptimized] = useState(false);
   const [isLoading, setIsLoading] = useState(showLoading);
+  const [driveFailed, setDriveFailed] = useState(false);
   const isMobile = useIsMobile();
 
+  // Drive images are resized by Google, never by Vercel
+  const driveUrl = typeof props.src === 'string' ? getDirectDriveUrl(props.src) : null;
+
   const handleError: ImageProps['onError'] = (error) => {
+    if (driveUrl) {
+      // Direct request failed (e.g. Google rate limit): retry once through our proxy.
+      // Not a Vercel billing issue, so leave global optimization alone.
+      if (!driveFailed) {
+        setDriveFailed(true);
+        return;
+      }
+      setIsLoading(false);
+      props.onError?.(error);
+      return;
+    }
+
     // Disable optimization globally so all subsequent images skip optimization
     if (!isOptimizationDisabled) {
       disableOptimization();
@@ -47,14 +69,28 @@ export function OptimizedImage({ showLoading = false, ...props }: OptimizedImage
   // This ensures the image refetches with the new unoptimized URL
   const shouldUseUnoptimized =
     props.unoptimized || isOptimizationDisabled || localUnoptimized;
-  const imageKey = `${props.src}-${shouldUseUnoptimized ? 'unopt' : 'opt'}`;
+  const sourceProps: Partial<Pick<ImageProps, 'src' | 'loader' | 'unoptimized'>> =
+    driveUrl
+      ? driveFailed
+        ? { src: getDriveProxyUrl(driveUrl), unoptimized: true }
+        : { src: driveUrl, loader: driveImageLoader, unoptimized: false }
+      : { unoptimized: shouldUseUnoptimized };
+  const imageKey = `${props.src}-${
+    driveUrl
+      ? driveFailed
+        ? 'drive-proxy'
+        : 'drive'
+      : shouldUseUnoptimized
+        ? 'unopt'
+        : 'opt'
+  }`;
 
   const imageElement = (
     <Image
       {...props}
+      {...sourceProps}
       key={imageKey}
       alt={props.alt || ''}
-      unoptimized={shouldUseUnoptimized}
       onError={handleError}
       onLoad={handleLoad}
     />

@@ -2,8 +2,14 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
+    // Vercel Hobby allows 5k transformations/month, and every (src, width, quality,
+    // format) combo counts as one, so keep the width/quality/format lists short.
+    // Drive images skip this entirely (see driveImageLoader).
+    deviceSizes: [640, 1080, 1920, 2560],
+    imageSizes: [256],
+    qualities: [75],
+    formats: ['image/webp'],
     // Allow local images with any pathname (including query strings)
-    // This enables /api/v1/proxy-image?url=... to be optimized by Next.js
     localPatterns: [
       {
         pathname: '/**',
@@ -44,7 +50,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    minimumCacheTTL: 1209600,
+    // 31 days: fewer cache misses = fewer re-transformations
+    minimumCacheTTL: 2678400,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
