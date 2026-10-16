@@ -125,12 +125,7 @@ export function ImagesGrid({
 
   // Pack by height, then hand Masonry one child per column (keeps that packing)
   const masonryColumns = useMemo(
-    () =>
-      packMasonryColumns(
-        images,
-        columnCount,
-        (image) => aspectById[image.id] ?? 1
-      ),
+    () => packMasonryColumns(images, columnCount, (image) => aspectById[image.id] ?? 1),
     [images, columnCount, aspectById]
   );
 
@@ -184,14 +179,14 @@ export function ImagesGrid({
         className={`group relative mb-4 overflow-hidden rounded ${
           isMobile ? '' : 'cursor-pointer'
         } fade-in-from-top
-        ${getDelayClass(globalIndex)}`}
+          ${getDelayClass(globalIndex)}`}
         onClick={isMobile ? undefined : () => onImageClick(globalIndex)}
       >
         <div className='relative overflow-hidden'>
           {hasFailed && isDrive ? (
             <div
-              className='flex h-64 flex-col items-center justify-center gap-2
-                bg-muted rounded'
+              className='flex h-64 flex-col items-center justify-center gap-2 bg-muted
+                rounded'
             >
               <ImageOff className='w-8 h-8 text-muted-foreground' />
               <Text variant='muted-sm'>Failed to load</Text>

@@ -602,7 +602,11 @@ interface CollectionFormProps {
 
 export function CollectionForm({ mode, collection, onSuccess }: CollectionFormProps) {
   const form = useForm({
-    defaultValues: collection || {/* empty defaults */},
+    defaultValues:
+      collection ||
+      {
+        /* empty defaults */
+      },
   });
 
   return (

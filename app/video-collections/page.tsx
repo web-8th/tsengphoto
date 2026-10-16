@@ -26,7 +26,7 @@ import VideoCollectionsLoading from './loading';
 import { Separator } from '@/components/ui';
 
 export default function VideoCollectionsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -53,6 +53,8 @@ export default function VideoCollectionsPage() {
       const result = await response.json();
       return result.data || [];
     },
+    // Wait for auth so we don't fetch once as anonymous and again once the key flips
+    enabled: !authLoading,
   });
 
   const deleteMutation = useMutation({
@@ -149,8 +151,8 @@ export default function VideoCollectionsPage() {
     }
   };
 
-  if (isLoading) {
-    return <VideoCollectionsLoading />;
+  if (authLoading || isLoading) {
+    return <VideoCollectionsLoading animate={false} />;
   }
 
   return (

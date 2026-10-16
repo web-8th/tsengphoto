@@ -263,7 +263,7 @@ export default function CollectionPageClient({
     (authLoading && !collection) || isLoadingCollection || (!collection && !isError);
 
   if (isLoading) {
-    return <CollectionLoading />;
+    return <CollectionLoading animate={false} />;
   }
 
   // Only call notFound after loading is complete and data is missing

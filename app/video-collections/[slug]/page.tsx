@@ -176,7 +176,7 @@ export default function VideoCollectionPage() {
   };
 
   if (authLoading || isLoadingCollection) {
-    return <VideoCollectionDetailLoading />;
+    return <VideoCollectionDetailLoading animate={false} />;
   }
 
   if (isError || !videoCollection) {

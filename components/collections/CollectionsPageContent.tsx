@@ -49,7 +49,7 @@ export function CollectionsPageContent({
   itemTypeName,
   showGroupsAndUnique = false,
 }: CollectionsPageContentProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -131,6 +131,8 @@ export function CollectionsPageContent({
       const result = await response.json();
       return result.data || [];
     },
+    // Wait for auth so we don't fetch once as anonymous and again once the key flips
+    enabled: !authLoading,
   });
 
   // Filter collections by type if filterType is provided
@@ -310,8 +312,8 @@ export function CollectionsPageContent({
   const ungroupedCollections = groupedCollections['Ungrouped'];
   const hasUngroupedCollections = ungroupedCollections && ungroupedCollections.length > 0;
 
-  if (isLoading) {
-    return <CollectionsLoading />;
+  if (authLoading || isLoading) {
+    return <CollectionsLoading animate={false} />;
   }
 
   return (
