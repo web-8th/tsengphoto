@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
+import { createPublicClient } from '@/utils/supabase/public';
+
+// Cache rendered page for a day, matching /collections/[slug]
+export const revalidate = 86400;
 
 // Social previews link straight to the cover image, so crawlers never hit a Vercel function
 const FALLBACK_OG_IMAGE = '/landing/carousel/carousel_1.webp';
+
+// Prebuild nothing; each slug is rendered on first visit, then cached (ISR)
+export function generateStaticParams() {
+  return [];
+}
 
 interface VideoCollectionLayoutProps {
   children: React.ReactNode;
@@ -15,25 +23,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Fetch video collection from database
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let query = supabase.from('video_collections').select('*').eq('slug', slug);
-
-  // Only filter by is_published for non-authenticated users
-  if (!user) {
-    query = query.eq('is_published', true);
-  }
-
-  const { data: videoCollection } = await query.single();
+  // Published-only, cookie-less query so this page can be cached (ISR) instead of
+  // rendering per request. Unpublished collections (admin preview) get generic metadata.
+  const supabase = createPublicClient();
+  const { data: videoCollection } = await supabase
+    .from('video_collections')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single();
 
   if (!videoCollection) {
     return {
-      title: 'Video Collection Not Found | Tseng Photography',
-      description: 'The requested video collection could not be found.',
+      title: 'Tseng Photography',
     };
   }
 

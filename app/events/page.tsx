@@ -1,29 +1,12 @@
 import { CollectionsPageContent } from '@/components/collections/CollectionsPageContent';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}): Promise<Metadata> {
-  const params = await searchParams;
-  const q = params.q as string | undefined;
-
-  let title = 'Events';
-  let description =
-    "Capturing life's special moments. From weddings to corporate gatherings, explore our event photography portfolio that preserves memories.";
-
-  if (q) {
-    const searchQuery = decodeURIComponent(q.replace(/\+/g, ' '));
-    title = `Search Events: ${searchQuery}`;
-    description = `Search results for "${searchQuery}" in our event photography collections.`;
-  }
-
-  return {
-    title: `${title} | Tseng Photography`,
-    description,
-  };
-}
+// Static metadata (no searchParams) so this page is served from the CDN, not rendered per request
+export const metadata: Metadata = {
+  title: 'Events | Tseng Photography',
+  description:
+    "Capturing life's special moments. From weddings to corporate gatherings, explore our event photography portfolio that preserves memories.",
+};
 
 export default function EventsPage() {
   return (

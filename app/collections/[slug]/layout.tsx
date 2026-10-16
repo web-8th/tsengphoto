@@ -1,9 +1,14 @@
 import type { Collection } from '@/lib/types';
-import { createClient } from '@/utils/supabase/server';
+import { createPublicClient } from '@/utils/supabase/public';
 import type { Metadata } from 'next';
 
 // Social previews link straight to the cover image, so crawlers never hit a Vercel function
 const FALLBACK_OG_IMAGE = '/landing/carousel/carousel_1.webp';
+
+// Prebuild nothing; each slug is rendered on first visit, then cached (ISR)
+export function generateStaticParams() {
+  return [];
+}
 
 interface CollectionLayoutProps {
   children: React.ReactNode;
@@ -16,25 +21,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Fetch collection from database
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let query = supabase.from('collections').select('*').eq('slug', slug);
-
-  // Only filter by is_published for non-authenticated users
-  if (!user) {
-    query = query.eq('is_published', true);
-  }
-
-  const { data: collection } = await query.single<Collection>();
+  // Published-only, cookie-less query so this page can be cached (ISR) instead of
+  // rendering per request. Unpublished collections (admin preview) get generic metadata.
+  const supabase = createPublicClient();
+  const { data: collection } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single<Collection>();
 
   if (!collection) {
     return {
-      title: 'Collection Not Found | Tseng Photography',
-      description: 'The requested collection could not be found.',
+      title: 'Tseng Photography',
     };
   }
 
