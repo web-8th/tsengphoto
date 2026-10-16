@@ -22,7 +22,7 @@ import {
 } from '@/components/animate-ui/components/alert-dialog';
 import { toast } from 'sonner';
 import type { VideoCollectionWithVideos } from '@/lib/types';
-import VideoCollectionsLoading from './loading';
+import { PageLoader } from '@/components/PageLoader';
 import { Separator } from '@/components/ui';
 
 export default function VideoCollectionsPage() {
@@ -152,7 +152,7 @@ export default function VideoCollectionsPage() {
   };
 
   if (authLoading || isLoading) {
-    return <VideoCollectionsLoading animate={false} />;
+    return <PageLoader />;
   }
 
   return (

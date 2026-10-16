@@ -1,3 +1,3 @@
-import CollectionsLoading from '@/app/collections/loading';
+import { PageLoader } from '@/components/PageLoader';
 
-export default CollectionsLoading;
+export default PageLoader;

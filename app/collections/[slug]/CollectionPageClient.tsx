@@ -21,6 +21,7 @@ import {
 import { Progress } from '@/components/animate-ui/components/radix/progress';
 import { CollectionUploadDialog } from '@/components/collections/CollectionUploadDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { PageLoader } from '@/components/PageLoader';
 import { Text } from '@/components/Text';
 import { Badge } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
@@ -46,7 +47,6 @@ import { notFound, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { ImagesGrid } from './components/ImagesGrid';
 import { ImageViewer } from './components/ImageViewer';
-import CollectionLoading from './loading';
 import { useZipWorker } from './useZipWorker';
 
 interface CollectionPageClientProps {
@@ -263,7 +263,7 @@ export default function CollectionPageClient({
     (authLoading && !collection) || isLoadingCollection || (!collection && !isError);
 
   if (isLoading) {
-    return <CollectionLoading animate={false} />;
+    return <PageLoader />;
   }
 
   // Only call notFound after loading is complete and data is missing

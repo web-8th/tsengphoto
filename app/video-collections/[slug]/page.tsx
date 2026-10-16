@@ -36,7 +36,7 @@ import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import VideoCollectionDetailLoading from './loading';
+import { PageLoader } from '@/components/PageLoader';
 
 export default function VideoCollectionPage() {
   const params = useParams();
@@ -176,7 +176,7 @@ export default function VideoCollectionPage() {
   };
 
   if (authLoading || isLoadingCollection) {
-    return <VideoCollectionDetailLoading animate={false} />;
+    return <PageLoader />;
   }
 
   if (isError || !videoCollection) {

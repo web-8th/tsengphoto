@@ -1,6 +1,5 @@
 'use client';
 
-import CollectionsLoading from '@/app/collections/loading';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import { CollectionCard } from '@/components/collections/CollectionCard';
 import { CollectionForm } from '@/components/collections/CollectionForm';
 import { CollectionGrid } from '@/components/collections/CollectionGrid';
 import { CollectionGroupCard } from '@/components/collections/CollectionGroupCard';
+import { PageLoader } from '@/components/PageLoader';
 import { SearchAndFilterBar } from '@/components/SearchAndFilterBar';
 import { Text } from '@/components/Text';
 import { Separator } from '@/components/ui';
@@ -313,7 +313,7 @@ export function CollectionsPageContent({
   const hasUngroupedCollections = ungroupedCollections && ungroupedCollections.length > 0;
 
   if (authLoading || isLoading) {
-    return <CollectionsLoading animate={false} />;
+    return <PageLoader />;
   }
 
   return (
