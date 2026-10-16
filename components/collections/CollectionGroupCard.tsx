@@ -2,11 +2,11 @@
 
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
-import { Badge, Card, CardDescription, CardHeader, CardTitle } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { cn } from '@/lib';
 import { CollectionWithImages } from '@/lib/types/database';
 import { scrollToTop } from '@/utils/scroll';
-import { Folder, ImageOff } from 'lucide-react';
+import { Layers, ImageOff } from 'lucide-react';
 
 interface CollectionGroupCardProps {
   groupName: string;
@@ -34,7 +34,7 @@ export function CollectionGroupCard({
     <div onClick={handleClick} className='cursor-pointer group block h-full'>
       <Card
         className={cn(
-          'h-full flex flex-col overflow-hidden transition-all hover:shadow-lg pt-0 gap-4',
+          'h-full overflow-hidden transition-all hover:shadow-lg py-0 gap-0',
           className
         )}
       >
@@ -60,27 +60,23 @@ export function CollectionGroupCard({
             </div>
           )}
 
-          {/* Group Badge - Top Left */}
-          <div className='absolute top-3 left-3'>
-            <Badge variant='secondary' className='flex items-center gap-1'>
-              <Folder className='size-3' />
-              Group
-            </Badge>
-          </div>
-        </div>
+          {/* Group icon - Top Right */}
+          <Layers className='absolute top-3 right-3 size-5 text-white drop-shadow-md
+            md:size-6' />
 
-        {/* Card Content */}
-        <CardHeader className='flex flex-col gap-2'>
-          <CardTitle>
-            <Text variant='bd-md'>{groupName}</Text>
-          </CardTitle>
-          <CardDescription>
-            <Text variant='caption'>
+          {/* Title overlay */}
+          <div
+            className='pointer-events-none absolute inset-x-0 bottom-0 h-1/2
+              bg-gradient-to-t from-black/80 via-black/40 to-transparent'
+          />
+          <div className='absolute bottom-3 left-4 right-4 text-white'>
+            <Text variant='hd-xs'>{groupName}</Text>
+            <Text variant='bd-xs' className='text-white/80'>
               {collections.length}{' '}
               {collections.length === 1 ? 'collection' : 'collections'}
             </Text>
-          </CardDescription>
-        </CardHeader>
+          </div>
+        </div>
       </Card>
     </div>
   );

@@ -4,12 +4,7 @@ import { Button } from '@/components/animate-ui/components/button';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
 import {
-  Badge,
   Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -17,7 +12,7 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib';
 import { CollectionWithImages } from '@/lib/types/database';
-import { Calendar, Edit, Globe, GlobeLock, ImageOff, MapPin, Trash2 } from 'lucide-react';
+import { Edit, Globe, GlobeLock, ImageOff, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface CollectionCardProps {
@@ -36,13 +31,6 @@ export function CollectionCard({
   onPublish,
 }: CollectionCardProps) {
   const { isAuthenticated } = useAuth();
-  const formattedDate = collection.date
-    ? new Date(collection.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -66,7 +54,7 @@ export function CollectionCard({
     <Link href={`/collections/${collection.slug}`} className='group block h-full'>
       <Card
         className={cn(
-          'h-full flex flex-col overflow-hidden transition-all hover:shadow-lg pt-0 gap-4',
+          'h-full overflow-hidden transition-all hover:shadow-lg py-0 gap-0',
           className
         )}
       >
@@ -91,6 +79,15 @@ export function CollectionCard({
               <Text variant='muted'>No cover image</Text>
             </div>
           )}
+
+          {/* Title overlay */}
+          <div
+            className='pointer-events-none absolute inset-x-0 bottom-0 h-1/2
+              bg-gradient-to-t from-black/80 via-black/40 to-transparent'
+          />
+          <Text variant='hd-xs' className='absolute bottom-3 left-4 right-4 text-white'>
+            {collection.title}
+          </Text>
 
           {/* Admin Actions - Top Left */}
           {isAuthenticated && (
@@ -123,42 +120,6 @@ export function CollectionCard({
           )}
         </div>
 
-        {/* Card Content */}
-        <CardHeader className='flex flex-col gap-0'>
-          <CardTitle>
-            <Text variant='bd-sm'>{collection.title}</Text>
-          </CardTitle>
-          <CardDescription>
-            <Text variant='caption'>{collection.description}</Text>
-          </CardDescription>
-        </CardHeader>
-
-        <CardFooter className='flex flex-col gap-2 justify-end items-start flex-1'>
-          {/* Date */}
-          {formattedDate && (
-            <div className='flex items-center gap-2 text-muted-foreground'>
-              <Calendar className='size-4' />
-              <Text variant='bd-sm'>{formattedDate}</Text>
-            </div>
-          )}
-
-          {/* Location */}
-          {collection.location && (
-            <div className='flex items-center gap-2 text-muted-foreground'>
-              <MapPin className='size-4' />
-              <Text variant='bd-sm'>{collection.location}</Text>
-            </div>
-          )}
-
-          <div className='flex flex-row gap-2'>
-            {/* Group badge */}
-            {collection.collection_group_name && (
-              <Badge variant='outline' className='capitalize'>
-                <Text variant='bd-xs'>{collection.collection_group_name}</Text>
-              </Badge>
-            )}
-          </div>
-        </CardFooter>
       </Card>
     </Link>
   );
