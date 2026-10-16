@@ -3,12 +3,7 @@
 import { Button } from '@/components/animate-ui/components/button';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
-import {
-  Card,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui';
+import { Card, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib';
 import { VideoCollectionWithVideos } from '@/lib/types/database';
