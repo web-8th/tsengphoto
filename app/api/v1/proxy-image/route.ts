@@ -33,11 +33,12 @@ export async function GET(request: NextRequest) {
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-    // Return the image with proper headers
+    // Return the image with proper headers.
+    // s-maxage lets Vercel's CDN cache it, so repeats don't re-run this function (FOT)
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
       },
     });
   } catch (error) {
