@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 
+// Social previews link straight to the cover image, so crawlers never hit a Vercel function
+const FALLBACK_OG_IMAGE = '/landing/carousel/carousel_1.webp';
+
 interface VideoCollectionLayoutProps {
   children: React.ReactNode;
 }
@@ -39,6 +42,11 @@ export async function generateMetadata({
     videoCollection.description || `View ${videoCollection.title} video collection`;
   const url = `https://tsengphoto.vercel.app/video-collections/${slug}`;
 
+  const ogImage = {
+    url: videoCollection.cover_image_url || FALLBACK_OG_IMAGE,
+    alt: videoCollection.title,
+  };
+
   return {
     metadataBase: new URL('https://tsengphoto.vercel.app'),
     title,
@@ -61,13 +69,13 @@ export async function generateMetadata({
       siteName: 'Tseng Photography',
       type: 'website',
       locale: 'en_CA',
-      // Images handled by opengraph-image.tsx for proper cropping
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      // Images handled by opengraph-image.tsx for proper cropping
+      images: [ogImage],
     },
     alternates: {
       canonical: `/video-collections/${slug}`,
