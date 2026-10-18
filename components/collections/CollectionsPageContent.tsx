@@ -9,8 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/animate-ui/components/alert-dialog';
-import { Button } from '@/components/animate-ui/components/button';
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { CollectionCard } from '@/components/collections/CollectionCard';
 import { CollectionForm } from '@/components/collections/CollectionForm';
 import { CollectionGrid } from '@/components/collections/CollectionGrid';

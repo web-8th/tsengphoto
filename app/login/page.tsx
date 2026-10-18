@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
 import {
   Card,

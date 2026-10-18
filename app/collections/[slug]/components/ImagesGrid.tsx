@@ -1,8 +1,8 @@
 'use client';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
-import { Button } from '@/components/animate-ui/components/button';
+import { Checkbox } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -225,11 +225,9 @@ export function ImagesGrid({
                   handleSelectOne(image.id, checked as boolean)
                 }
                 disabled={isBulkDeleting}
-                variant='overlay'
+                className='bg-background/80 backdrop-blur-sm'
                 onClick={(e) => e.stopPropagation()}
-              >
-                <CheckboxIndicator />
-              </Checkbox>
+              />
             </div>
           )}
 
@@ -270,9 +268,7 @@ export function ImagesGrid({
               checked={selectedIds.size === images.length && images.length > 0}
               onCheckedChange={handleSelectAll}
               disabled={isBulkDeleting}
-            >
-              <CheckboxIndicator />
-            </Checkbox>
+            />
             <Text variant='bd-sm'>Select All</Text>
           </label>
           <div className='flex gap-2'>

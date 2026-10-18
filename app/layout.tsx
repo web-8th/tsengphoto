@@ -2,21 +2,22 @@ import { Navbar } from '@/components/Navbar';
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ImageOptimizationProvider } from '@/contexts/ImageOptimizationContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { LoadingProvider } from '@/hooks/use-loading';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, Libre_Baskerville } from 'next/font/google';
+import { IBM_Plex_Mono, Merriweather } from 'next/font/google';
 
 import { Footer } from '@/components/Footer';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { cn } from '@/lib/utils';
 import './globals.css';
 
-const fontSans = Libre_Baskerville({
+const fontSans = Merriweather({
   subsets: ['latin'],
-  weight: ['400', '700'],
   variable: '--font-sans',
 });
 
@@ -74,17 +75,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
-      <body className={`${fontSans.variable} ${fontMono.variable} antialiased`}>
+    <html
+      lang='en'
+      className={cn(fontSans.variable, fontMono.variable)}
+    >
+      <body className='antialiased'>
         <ImageOptimizationProvider>
           <AuthProvider>
             <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
               <QueryProvider>
                 <LoadingProvider>
                   <ToastProvider>
-                    <Navbar />
-                    <main>{children}</main>
-                    <Footer />
+                    <TooltipProvider>
+                      <Navbar />
+                      <main>{children}</main>
+                      <Footer />
+                    </TooltipProvider>
                     <Toaster />
                     <Analytics />
                     <SpeedInsights />

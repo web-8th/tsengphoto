@@ -1,6 +1,6 @@
 'use client';
 
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
+import { Checkbox } from '@/components/ui';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,8 +10,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/animate-ui/components/alert-dialog';
-import { Button } from '@/components/animate-ui/components/button';
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/EmptyState';
 import { Text } from '@/components/Text';
 import { Spinner } from '@/components/ui';
@@ -311,9 +311,7 @@ export default function VideoCollectionPage() {
                     }
                     onCheckedChange={handleSelectAll}
                     disabled={bulkDeleteMutation.isPending}
-                  >
-                    <CheckboxIndicator />
-                  </Checkbox>
+                  />
                   <Text variant='bd-sm'>Select All</Text>
                 </label>
                 {(selectedVideoIds.size > 0 || bulkDeleteMutation.isPending) && (

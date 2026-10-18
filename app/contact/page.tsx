@@ -8,8 +8,8 @@ import { z } from 'zod';
 
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
-import { Button } from '@/components/animate-ui/components/button';
+import { Checkbox } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -275,9 +275,7 @@ export default function ContactPage() {
                                           : current.filter((s) => s !== service)
                                       );
                                     }}
-                                  >
-                                    <CheckboxIndicator />
-                                  </Checkbox>
+                                  />
                                 </FormControl>
                                 <FormLabel>{service}</FormLabel>
                               </FormItem>
@@ -298,22 +296,24 @@ export default function ContactPage() {
                         <FormItem>
                           <FormLabel>Preferred Date</FormLabel>
                           <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant='outline'
-                                  className={`w-full justify-start text-left font-normal
-                                    ${!field.value && 'text-muted-foreground'} `}
-                                >
-                                  <CalendarIcon />
-                                  {field.value ? (
-                                    format(field.value, 'PPP')
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
+                            <FormControl>
+                              <PopoverTrigger
+                                render={
+                                  <Button
+                                    variant='outline'
+                                    className={`w-full justify-start text-left font-normal
+                                      ${!field.value && 'text-muted-foreground'} `}
+                                  />
+                                }
+                              >
+                                <CalendarIcon />
+                                {field.value ? (
+                                  format(field.value, 'PPP')
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                              </PopoverTrigger>
+                            </FormControl>
                             <PopoverContent className='w-auto p-0' align='start'>
                               <Calendar
                                 mode='single'

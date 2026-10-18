@@ -4,10 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/Text';
 import { Video as VideoType } from '@/lib/types';
 import { OptimizedImage } from '@/components/OptimizedImage';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { Trash2, Play } from 'lucide-react';
 import { cn } from '@/lib';
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
+import { Checkbox } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
 
 interface VideoCardProps {
@@ -83,11 +83,9 @@ export function VideoCard({
               checked={isSelected}
               onCheckedChange={onSelect}
               disabled={isBulkDeleting}
-              variant='overlay'
+              className='bg-background/80 backdrop-blur-sm'
               onClick={(e) => e.stopPropagation()}
-            >
-              <CheckboxIndicator />
-            </Checkbox>
+            />
           </div>
         )}
 

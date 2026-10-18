@@ -7,7 +7,7 @@ import { Text } from '@/components/Text';
 import { getDelayClass } from '@/utils/animations';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { videoCollectionsQueryKeys } from '@/lib/queries/video-collections';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import {
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/animate-ui/components/alert-dialog';
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import type { VideoCollectionWithVideos } from '@/lib/types';
 import { PageLoader } from '@/components/PageLoader';
@@ -156,7 +156,7 @@ export default function VideoCollectionsPage() {
   }
 
   return (
-    <div className='pt-18'>
+    <div className='flex min-h-screen flex-col pt-18'>
       <div
         className='container mx-auto border-x-2 border-dashed text-center space-y-4 py-8'
       >
@@ -174,7 +174,7 @@ export default function VideoCollectionsPage() {
         </Text>
       </div>
       <Separator className='border' />
-      <div className='container mx-auto px-4 py-4 border-dashed border-x-2'>
+      <div className='container mx-auto flex-1 px-4 py-4 border-dashed border-x-2'>
         {/* Add Button - Only for authenticated users */}
         {isAuthenticated && (
           <div
