@@ -156,7 +156,7 @@ export default function VideoCollectionsPage() {
   }
 
   return (
-    <div className='pt-18'>
+    <div className='flex min-h-screen flex-col pt-18'>
       <div
         className='container mx-auto border-x-2 border-dashed text-center space-y-4 py-8'
       >
@@ -174,7 +174,7 @@ export default function VideoCollectionsPage() {
         </Text>
       </div>
       <Separator className='border' />
-      <div className='container mx-auto px-4 py-4 border-dashed border-x-2'>
+      <div className='container mx-auto flex-1 px-4 py-4 border-dashed border-x-2'>
         {/* Add Button - Only for authenticated users */}
         {isAuthenticated && (
           <div
