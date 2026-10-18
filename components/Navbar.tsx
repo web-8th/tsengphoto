@@ -173,7 +173,7 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className='hidden items-center gap-4 lg:flex'>
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className='gap-2'>
               <NavigationMenuItem>
                 <NavigationMenuLink
                   className={navigationMenuTriggerStyle()}
