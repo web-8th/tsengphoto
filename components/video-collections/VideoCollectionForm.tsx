@@ -1,13 +1,15 @@
 'use client';
 
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
-import { Button } from '@/components/animate-ui/components/button';
+import { Checkbox } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/animate-ui/components/dialog';
+} from '@/components/ui/dialog';
 import { CoverImageUploader } from '@/components/CoverImageUploader';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -269,7 +271,7 @@ export function VideoCollectionForm({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-h-[70vh] sm:max-h-[90vh] overflow-y-auto'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {mode === 'add' ? 'Add Video Collection' : 'Edit Video Collection'}
@@ -277,198 +279,204 @@ export function VideoCollectionForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='title'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleTitleChange(e.target.value);
-                      }}
-                      placeholder='A memorable collection title'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex min-h-0 flex-1 flex-col'
+          >
+            <DialogBody>
+              <FormField
+                control={form.control}
+                name='title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleTitleChange(e.target.value);
+                        }}
+                        placeholder='A memorable collection title'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name='slug'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Slug
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className='size-4 text-muted-foreground' />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        A URL-friendly version of the collection title. It should be
-                        lowercase, with words separated by hyphens.
-                      </TooltipContent>
-                    </Tooltip>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='user-friendly-readable-slug' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name='slug'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Slug
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className='size-4 text-muted-foreground' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          A URL-friendly version of the collection title. It should be
+                          lowercase, with words separated by hyphens.
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder='user-friendly-readable-slug' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name='date'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Date (optional)</FormLabel>
-                  <div className='flex gap-2'>
-                    <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                      <PopoverTrigger asChild className='flex-1'>
+              <FormField
+                control={form.control}
+                name='date'
+                render={({ field }) => (
+                  <FormItem className='flex flex-col'>
+                    <FormLabel>Date (optional)</FormLabel>
+                    <div className='flex gap-2'>
+                      <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                         <FormControl>
-                          <Button
-                            variant='outline'
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !dateValue && 'text-muted-foreground'
-                            )}
+                          <PopoverTrigger
+                            className='flex-1'
+                            render={
+                              <Button
+                                variant='outline'
+                                className={cn(
+                                  'w-full pl-3 text-left font-normal',
+                                  !dateValue && 'text-muted-foreground'
+                                )}
+                              />
+                            }
                           >
                             {dateValue ? format(dateValue, 'PPP') : 'Pick a date'}
                             <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                          </Button>
+                          </PopoverTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className='w-auto p-0' align='start'>
-                        <Calendar
-                          mode='single'
-                          selected={field.value ?? undefined}
-                          onSelect={(date) => {
-                            field.onChange(date ?? undefined);
+                        <PopoverContent className='w-auto p-0' align='start'>
+                          <Calendar
+                            mode='single'
+                            selected={field.value ?? undefined}
+                            onSelect={(date) => {
+                              field.onChange(date ?? undefined);
+                              setDatePopoverOpen(false);
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {dateValue && (
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          onClick={() => {
+                            field.onChange(undefined);
                             setDatePopoverOpen(false);
                           }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {dateValue && (
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        onClick={() => {
-                          field.onChange(undefined);
-                          setDatePopoverOpen(false);
+                        >
+                          <X className='size-5' />
+                        </Button>
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='location'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location (optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder='Kelowna, BC' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder='A memorable collection description...'
+                        rows={3}
+                        className='max-h-50'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='cover_image_url'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CoverImageUploader
+                        value={field.value}
+                        uploadId={coverImageId}
+                        onChange={(data) => {
+                          form.setValue('cover_image_url', data.url);
+                          if (data.uploadId) {
+                            form.setValue('cover_image_id', data.uploadId);
+                            pendingCoverImageIdRef.current = data.uploadId; // Track for cleanup
+                          }
                         }}
-                      >
-                        <X className='size-5' />
-                      </Button>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
+                        onRemove={() => {
+                          form.setValue('cover_image_url', '');
+                          form.setValue('cover_image_id', '');
+                          pendingCoverImageIdRef.current = null; // Clear pending tracking
+                        }}
+                        onUploadingChange={setIsCoverImageUploading}
+                        mode={mode}
+                        collectionId={videoCollection?.id}
+                        entityType='video-collection'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='is_published'
+                render={({ field }) => (
+                  <FormItem className='flex flex-row items-center'>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className='rounded'
+                      />
+                    </FormControl>
+                    <div className='space-y-1 leading-none'>
+                      <FormLabel>Published</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.formState.errors.root && (
+                <div className='text-sm text-destructive'>
+                  {form.formState.errors.root.message}
+                </div>
               )}
-            />
+            </DialogBody>
 
-            <FormField
-              control={form.control}
-              name='location'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location (optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='Kelowna, BC' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder='A memorable collection description...'
-                      rows={3}
-                      className='max-h-50'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='cover_image_url'
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <CoverImageUploader
-                      value={field.value}
-                      uploadId={coverImageId}
-                      onChange={(data) => {
-                        form.setValue('cover_image_url', data.url);
-                        if (data.uploadId) {
-                          form.setValue('cover_image_id', data.uploadId);
-                          pendingCoverImageIdRef.current = data.uploadId; // Track for cleanup
-                        }
-                      }}
-                      onRemove={() => {
-                        form.setValue('cover_image_url', '');
-                        form.setValue('cover_image_id', '');
-                        pendingCoverImageIdRef.current = null; // Clear pending tracking
-                      }}
-                      onUploadingChange={setIsCoverImageUploading}
-                      mode={mode}
-                      collectionId={videoCollection?.id}
-                      entityType='video-collection'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='is_published'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center'>
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className='rounded'
-                    >
-                      <CheckboxIndicator />
-                    </Checkbox>
-                  </FormControl>
-                  <div className='space-y-1 leading-none'>
-                    <FormLabel>Published</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            {form.formState.errors.root && (
-              <div className='text-sm text-destructive'>
-                {form.formState.errors.root.message}
-              </div>
-            )}
-
-            <div className='flex gap-2 justify-end'>
+            <DialogFooter>
               <Button
                 type='button'
                 variant='outline'
@@ -494,7 +502,7 @@ export function VideoCollectionForm({
                   'Update'
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

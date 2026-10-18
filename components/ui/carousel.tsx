@@ -1,11 +1,11 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from 'cn';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -15,10 +15,6 @@ type CarouselPlugin = UseCarouselParameters[1];
 type CarouselProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
-  btnVariant?: React.ComponentProps<typeof Button>['variant'];
-  btnLocation?: 'default' | 'mb' | 'below-carousel';
-  showDots?: boolean;
-  dotsLocation?: 'absolute' | 'below-carousel';
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
 };
@@ -30,10 +26,6 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
-  btnVariant?: React.ComponentProps<typeof Button>['variant'];
-  btnLocation?: 'default' | 'mb' | 'below-carousel';
-  showDots?: boolean;
-  dotsLocation?: 'absolute' | 'below-carousel';
 } & CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
@@ -55,10 +47,6 @@ function Carousel({
   plugins,
   className,
   children,
-  btnVariant = 'outline',
-  btnLocation = 'default',
-  showDots = false,
-  dotsLocation = 'absolute',
   ...props
 }: React.ComponentProps<'div'> & CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
@@ -126,10 +114,6 @@ function Carousel({
         scrollNext,
         canScrollPrev,
         canScrollNext,
-        btnVariant,
-        btnLocation,
-        showDots,
-        dotsLocation,
       }}
     >
       <div
@@ -183,134 +167,61 @@ function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CarouselPrevious({
   className,
-  variant,
-  size = 'icon',
+  variant = 'outline',
+  size = 'icon-sm',
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollPrev, canScrollPrev, btnVariant, btnLocation } =
-    useCarousel();
+  const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
   return (
     <Button
       data-slot='carousel-previous'
-      variant={variant || btnVariant || 'outline'}
+      variant={variant}
       size={size}
       className={cn(
-        'size-8 rounded-full',
-        btnLocation === 'mb'
-          ? 'relative'
-          : btnLocation === 'below-carousel'
-            ? 'relative'
-            : orientation === 'horizontal'
-              ? 'absolute top-1/2 -left-12 -translate-y-1/2'
-              : 'absolute -top-12 left-1/2 -translate-x-1/2 rotate-90',
+        'absolute touch-manipulation',
+        orientation === 'horizontal'
+          ? 'inset-y-0 -left-12 my-auto'
+          : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
         className
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <>
-        <ArrowLeft />
-        <span className='sr-only'>Previous slide</span>
-      </>
+      <ChevronLeftIcon />
+      <span className='sr-only'>Previous slide</span>
     </Button>
   );
 }
 
 function CarouselNext({
   className,
-  variant,
-  size = 'icon',
+  variant = 'outline',
+  size = 'icon-sm',
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollNext, canScrollNext, btnVariant, btnLocation } =
-    useCarousel();
+  const { orientation, scrollNext, canScrollNext } = useCarousel();
 
   return (
     <Button
       data-slot='carousel-next'
-      variant={variant || btnVariant || 'outline'}
+      variant={variant}
       size={size}
       className={cn(
-        'size-8 rounded-full',
-        btnLocation === 'mb'
-          ? 'relative'
-          : btnLocation === 'below-carousel'
-            ? 'relative'
-            : orientation === 'horizontal'
-              ? 'absolute top-1/2 -right-12 -translate-y-1/2'
-              : 'absolute -bottom-12 left-1/2 -translate-x-1/2 rotate-90',
+        'absolute touch-manipulation',
+        orientation === 'horizontal'
+          ? 'inset-y-0 -right-12 my-auto'
+          : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
         className
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <>
-        <ArrowRight />
-        <span className='sr-only'>Next slide</span>
-      </>
+      <ChevronRightIcon />
+      <span className='sr-only'>Next slide</span>
     </Button>
-  );
-}
-
-function CarouselDots({ className, ...props }: React.ComponentProps<'div'>) {
-  const { api, dotsLocation } = useCarousel();
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
-
-  const onInit = React.useCallback((api: CarouselApi) => {
-    if (!api) return;
-    setScrollSnaps(api.scrollSnapList());
-  }, []);
-
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) return;
-    setSelectedIndex(api.selectedScrollSnap());
-  }, []);
-
-  React.useEffect(() => {
-    if (!api) return;
-    // Sync dots with Embla (external store); defer to avoid sync setState-in-effect
-    queueMicrotask(() => {
-      onInit(api);
-      onSelect(api);
-    });
-    api.on('reInit', onInit);
-    api.on('reInit', onSelect);
-    api.on('select', onSelect);
-
-    return () => {
-      api?.off('select', onSelect);
-    };
-  }, [api, onInit, onSelect]);
-
-  return (
-    <div
-      className={cn(
-        'flex gap-2 justify-center',
-        dotsLocation === 'absolute'
-          ? 'absolute bottom-7 left-1/2 -translate-x-1/2 z-10'
-          : '',
-        className
-      )}
-      {...props}
-    >
-      {scrollSnaps.map((_, index) => (
-        <button
-          key={index}
-          className={cn(
-            'rounded-full transition-all',
-            index === selectedIndex
-              ? 'w-6 h-2 bg-primary'
-              : 'w-2 h-2 bg-accent hover:bg-accent-foreground'
-          )}
-          onClick={() => api?.scrollTo(index)}
-          aria-label={`Go to slide ${index + 1}`}
-        />
-      ))}
-    </div>
   );
 }
 
@@ -321,5 +232,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-  CarouselDots,
+  useCarousel,
 };

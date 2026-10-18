@@ -7,7 +7,7 @@ import { Text } from '@/components/Text';
 import { getDelayClass } from '@/utils/animations';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { videoCollectionsQueryKeys } from '@/lib/queries/video-collections';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import {
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/animate-ui/components/alert-dialog';
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import type { VideoCollectionWithVideos } from '@/lib/types';
 import { PageLoader } from '@/components/PageLoader';

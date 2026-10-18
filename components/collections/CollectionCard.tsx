@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { Text } from '@/components/Text';
 import { Card, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui';
@@ -92,14 +92,16 @@ export function CollectionCard({
                   <Edit />
                 </Button>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={collection.is_published ? 'secondary' : 'default'}
-                      size='icon'
-                      onClick={handlePublish}
-                    >
-                      {collection.is_published ? <Globe /> : <GlobeLock />}
-                    </Button>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant={collection.is_published ? 'secondary' : 'default'}
+                        size='icon'
+                        onClick={handlePublish}
+                      />
+                    }
+                  >
+                    {collection.is_published ? <Globe /> : <GlobeLock />}
                   </TooltipTrigger>
                   <TooltipContent>
                     {collection.is_published

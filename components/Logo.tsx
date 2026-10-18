@@ -1,4 +1,4 @@
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -11,14 +11,13 @@ interface LogoProps {
 export function Logo({ className, showText = true, onClick }: LogoProps) {
   return (
     <div className='flex items-center justify-center'>
-      <Button variant='link' className='p-0 m-0'>
-        <Link
-          href='/'
-          className={cn('flex items-center gap-2', className)}
-          onClick={onClick}
-        >
-          {showText && <span className={className}>Tseng Photography</span>}
-        </Link>
+      <Button
+        variant='link'
+        className={cn('m-0 h-auto gap-2 p-0', className)}
+        nativeButton={false}
+        render={<Link href='/' onClick={onClick} />}
+      >
+        {showText && <span>Tseng Photography</span>}
       </Button>
     </div>
   );

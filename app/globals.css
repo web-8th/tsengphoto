@@ -1,13 +1,19 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @source "../node_modules/@uploadthing/react/dist";
-
-@plugin 'tailwindcss-animate';
 
 @custom-variant dark (&:is(.dark *));
 
 @source inline("delay-[{50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1050,1100,1150,1200,1250,1300,1350,1400,1450,1500}ms]");
+
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fade-x, 0), var(--fade-y, 0), 0);
+  }
+}
 
 @keyframes sweep {
   from {
@@ -37,28 +43,38 @@
     @apply pt-24;
   }
 
+  /* Own keyframe instead of tw-animate's `enter`, which also animates `filter: blur()`.
+     A filter makes the browser rasterize the text while it moves, so it looks pixelated. */
+  .fade-in-from-bottom,
+  .fade-in-from-right,
+  .fade-in-from-left,
+  .fade-in-from-left-full,
+  .fade-in-from-top,
+  .fade-in-from-0 {
+    animation: fade-slide-in var(--tw-animation-duration, var(--tw-duration, 500ms))
+      var(--tw-ease, ease) both;
+  }
+
   .fade-in-from-bottom {
-    @apply animate-in slide-in-from-bottom-10 fade-in fill-mode-both duration-500;
+    --fade-y: 2.5rem;
   }
 
   .fade-in-from-right {
-    @apply animate-in slide-in-from-right-10 fade-in fill-mode-both duration-500;
+    --fade-x: 2.5rem;
   }
 
   .fade-in-from-left {
-    @apply animate-in slide-in-from-left-10 fade-in fill-mode-both duration-500;
+    --fade-x: -2.5rem;
   }
 
   .fade-in-from-left-full {
-    @apply animate-in slide-in-from-left-translate-full fade-in ease-out fill-mode-both duration-300;
+    --fade-x: -100%;
+    --tw-duration: 300ms;
+    --tw-ease: cubic-bezier(0, 0, 0.2, 1);
   }
 
   .fade-in-from-top {
-    @apply animate-in slide-in-from-top-10 fade-in fill-mode-both duration-500;
-  }
-
-  .fade-in-from-0 {
-    @apply animate-in fade-in fill-mode-both duration-500;
+    --fade-y: -2.5rem;
   }
 }
 
@@ -80,8 +96,6 @@
 }
 
 :root {
-  --background: oklch(0.9582 0.0152 90.2357);
-  --foreground: oklch(0.376 0.0225 64.3434);
   --card: oklch(0.9914 0.0098 87.4695);
   --card-foreground: oklch(0.376 0.0225 64.3434);
   --popover: oklch(0.9914 0.0098 87.4695);
@@ -112,10 +126,8 @@
   --sidebar-accent-foreground: oklch(0.376 0.0225 64.3434);
   --sidebar-border: oklch(0.8606 0.0321 84.5881);
   --sidebar-ring: oklch(0.618 0.0778 65.5444);
-  --font-sans: Libre Baskerville, serif;
   --font-serif: Lora, serif;
-  --font-mono: IBM Plex Mono, monospace;
-  --radius: 0.25rem;
+  --radius: 0.625rem;
   --shadow-x: 2px;
   --shadow-y: 3px;
   --shadow-blur: 5px;
@@ -137,6 +149,8 @@
   --shadow-2xl: 2px 3px 5px 0px hsl(28 13% 20% / 0.3);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  --background: oklch(0.9582 0.0152 90.2357);
+  --foreground: oklch(0.376 0.0225 64.3434);
 }
 
 .dark {
@@ -172,10 +186,7 @@
   --sidebar-accent-foreground: oklch(0.9239 0.019 83.0636);
   --sidebar-border: oklch(0.3795 0.0181 57.128);
   --sidebar-ring: oklch(0.7264 0.0581 66.6967);
-  --font-sans: Libre Baskerville, serif;
   --font-serif: Lora, serif;
-  --font-mono: IBM Plex Mono, monospace;
-  --radius: 0.25rem;
   --shadow-x: 2px;
   --shadow-y: 3px;
   --shadow-blur: 5px;
@@ -235,10 +246,10 @@
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) * 1.4);
 
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
@@ -248,6 +259,10 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+  --font-heading: var(--font-sans);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
@@ -256,6 +271,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 

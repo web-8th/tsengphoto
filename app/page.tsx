@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import { Hero } from '@/components/Hero';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
 import { Text } from '@/components/Text';
@@ -150,6 +150,7 @@ export default function Home() {
           containerClassName='aspect-video'
           itemsToShow={2}
           navigation='below'
+          btnVariant='outline'
           images={eventPhotography}
           objectPosition='center 20%'
         />
@@ -178,6 +179,7 @@ export default function Home() {
           containerClassName='aspect-square'
           itemsToShow={3}
           navigation='below'
+          btnVariant='outline'
           images={portraitPhotography}
           objectPosition='center 40%'
         />

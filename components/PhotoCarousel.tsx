@@ -6,14 +6,115 @@ import {
   Carousel,
   CarouselApi,
   CarouselContent,
-  CarouselDots,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  Progress,
+  useCarousel,
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import Autoplay from 'embla-carousel-autoplay';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// Fills the active dot over the autoplay delay. Shows a solid dot whenever autoplay
+// isn't running (no delay, off-screen, or stopped after the user interacts).
+function AutoplayProgressDot({ delay }: { delay: number }) {
+  const { api } = useCarousel();
+  const [value, setValue] = useState(100);
+
+  useEffect(() => {
+    const autoplay = api?.plugins().autoplay;
+    if (!autoplay || delay <= 0) return;
+
+    let frame: number;
+    const tick = () => {
+      const remaining = autoplay.isPlaying() ? autoplay.timeUntilNext() : null;
+      setValue(remaining === null ? 100 : (1 - remaining / delay) * 100);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frame);
+  }, [api, delay]);
+
+  return (
+    <Progress
+      aria-hidden
+      value={value}
+      // Fill with scaleX instead of the indicator's width: width snaps to whole pixels,
+      // which steps visibly on a bar this small, while transforms render sub-pixel
+      style={{ '--dot-progress': value / 100 } as React.CSSProperties}
+      className='w-full [&_[data-slot=progress-indicator]]:w-full!
+        [&_[data-slot=progress-indicator]]:origin-left
+        [&_[data-slot=progress-indicator]]:scale-x-(--dot-progress)
+        [&_[data-slot=progress-indicator]]:transition-none
+        [&_[data-slot=progress-indicator]]:will-change-transform
+        [&_[data-slot=progress-track]]:h-2 [&_[data-slot=progress-track]]:bg-accent'
+    />
+  );
+}
+
+function CarouselDots({
+  className,
+  autoplayDelay = 0,
+  ...props
+}: React.ComponentProps<'div'> & { autoplayDelay?: number }) {
+  const { api } = useCarousel();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onInit = useCallback((api: CarouselApi) => {
+    if (!api) return;
+    setScrollSnaps(api.scrollSnapList());
+  }, []);
+
+  const onSelect = useCallback((api: CarouselApi) => {
+    if (!api) return;
+    setSelectedIndex(api.selectedScrollSnap());
+  }, []);
+
+  useEffect(() => {
+    if (!api) return;
+    // Sync dots with Embla (external store); defer to avoid sync setState-in-effect
+    queueMicrotask(() => {
+      onInit(api);
+      onSelect(api);
+    });
+    api.on('reInit', onInit);
+    api.on('reInit', onSelect);
+    api.on('select', onSelect);
+
+    return () => {
+      api.off('reInit', onInit);
+      api.off('reInit', onSelect);
+      api.off('select', onSelect);
+    };
+  }, [api, onInit, onSelect]);
+
+  return (
+    <div
+      className={cn(
+        'absolute bottom-7 left-1/2 z-10 flex -translate-x-1/2 justify-center gap-2',
+        className
+      )}
+      {...props}
+    >
+      {scrollSnaps.map((_, index) => (
+        <button
+          key={index}
+          className={cn(
+            'flex h-2 transition-all',
+            index === selectedIndex ? 'w-6' : 'w-2 bg-accent hover:bg-accent-foreground'
+          )}
+          onClick={() => api?.scrollTo(index)}
+          aria-label={`Go to slide ${index + 1}`}
+        >
+          {index === selectedIndex && <AutoplayProgressDot delay={autoplayDelay} />}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 interface PhotoCarouselProps {
   images: string[];
@@ -21,7 +122,7 @@ interface PhotoCarouselProps {
   className?: string;
   containerClassName?: string;
   itemsToShow?: 1 | 2 | 3;
-  btnVariant?: 'default' | 'outline' | 'ghost' | 'secondary';
+  btnVariant?: 'ghost' | 'outline';
   navigation?: 'overlay' | 'bottom-center' | 'side-center' | 'below' | 'none';
   showButtons?: boolean;
   fullWidth?: boolean;
@@ -48,6 +149,10 @@ export function PhotoCarousel({
   showLoading = true,
   onIndexChange,
 }: PhotoCarouselProps) {
+  // Ghost hovers to bg-muted, which disappears on muted sections; accent stays visible
+  const navButtonClass =
+    btnVariant === 'ghost' ? 'hover:bg-accent hover:text-accent-foreground' : '';
+
   const itemBasisClass =
     itemsToShow === 1
       ? 'basis-full'
@@ -111,8 +216,6 @@ export function PhotoCarousel({
     >
       <Carousel
         setApi={setApi}
-        btnVariant={btnVariant}
-        showDots={showDots}
         className={cn('w-full')}
         opts={carouselOpts}
         plugins={plugins}
@@ -174,11 +277,17 @@ export function PhotoCarousel({
           <>
             {showButtons && (
               <>
-                <CarouselPrevious className='hidden sm:flex' />
-                <CarouselNext className='hidden sm:flex' />
+                <CarouselPrevious
+                  variant={btnVariant}
+                  className={cn(navButtonClass, 'hidden sm:flex')}
+                />
+                <CarouselNext
+                  variant={btnVariant}
+                  className={cn(navButtonClass, 'hidden sm:flex')}
+                />
               </>
             )}
-            {showDots && <CarouselDots />}
+            {showDots && <CarouselDots autoplayDelay={autoplayDelay} />}
           </>
         )}
         {/* Navigation: Bottom Center */}
@@ -187,9 +296,24 @@ export function PhotoCarousel({
             className='absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center
               mb-2 gap-3'
           >
-            {showButtons && <CarouselPrevious className='hidden sm:flex' />}
-            {showDots && <CarouselDots className='static translate-x-0' />}
-            {showButtons && <CarouselNext className='hidden sm:flex' />}
+            {showButtons && (
+              <CarouselPrevious
+                variant={btnVariant}
+                className={cn(navButtonClass, 'hidden sm:flex')}
+              />
+            )}
+            {showDots && (
+              <CarouselDots
+                autoplayDelay={autoplayDelay}
+                className='static translate-x-0'
+              />
+            )}
+            {showButtons && (
+              <CarouselNext
+                variant={btnVariant}
+                className={cn(navButtonClass, 'hidden sm:flex')}
+              />
+            )}
           </div>
         )}
         {/* Navigation: Side Center */}
@@ -197,13 +321,22 @@ export function PhotoCarousel({
           <>
             {showButtons && (
               <>
-                <CarouselPrevious className='hidden sm:flex left-4' />
-                <CarouselNext className='hidden sm:flex right-4' />
+                <CarouselPrevious
+                  variant={btnVariant}
+                  className={cn(navButtonClass, 'hidden sm:flex left-4')}
+                />
+                <CarouselNext
+                  variant={btnVariant}
+                  className={cn(navButtonClass, 'hidden sm:flex right-4')}
+                />
               </>
             )}
             {showDots && (
               <div className='absolute bottom-4 left-1/2 -translate-x-1/2 z-10'>
-                <CarouselDots className='static translate-x-0' />
+                <CarouselDots
+                  autoplayDelay={autoplayDelay}
+                  className='static translate-x-0'
+                />
               </div>
             )}
           </>
@@ -212,11 +345,22 @@ export function PhotoCarousel({
         {navigation === 'below' && (
           <div className='flex items-center justify-center gap-4 mt-2'>
             {showButtons && (
-              <CarouselPrevious className='static translate-x-0 translate-y-0' />
+              <CarouselPrevious
+                variant={btnVariant}
+                className={cn(navButtonClass, 'static translate-x-0 translate-y-0')}
+              />
             )}
-            {showDots && <CarouselDots className='static translate-x-0' />}
+            {showDots && (
+              <CarouselDots
+                autoplayDelay={autoplayDelay}
+                className='static translate-x-0'
+              />
+            )}
             {showButtons && (
-              <CarouselNext className='static translate-x-0 translate-y-0' />
+              <CarouselNext
+                variant={btnVariant}
+                className={cn(navButtonClass, 'static translate-x-0 translate-y-0')}
+              />
             )}
           </div>
         )}

@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import {
   Button,
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -19,7 +20,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/animate-ui/components/';
+} from '@/components/ui';
 import { Spinner } from '@/components/ui';
 import {
   Accordion,
@@ -46,10 +47,12 @@ import { ModeToggle } from './ModeToggle';
 
 function LoginButton({ onClose }: { onClose?: () => void }) {
   return (
-    <Button variant='outline' asChild>
-      <Link href='/login' onClick={onClose}>
-        <LogIn />
-      </Link>
+    <Button
+      variant='outline'
+      nativeButton={false}
+      render={<Link href='/login' onClick={onClose} />}
+    >
+      <LogIn />
     </Button>
   );
 }
@@ -79,18 +82,19 @@ function LogoutButton({ user, onClose }: { user: User; onClose?: () => void }) {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant='outline'>
-          {user.email?.split('@')[0]} <LogOut />
-        </Button>
+      <DialogTrigger render={<Button variant='outline' />}>
+        {user.email?.split('@')[0]} <LogOut />
       </DialogTrigger>
       <DialogContent className='sm:max-w-106.25'>
         <DialogHeader>
           <DialogTitle>Logout?</DialogTitle>
         </DialogHeader>
-        <DialogDescription>
-          Are you sure you want to logout from your account <strong>{user.email}</strong>?
-        </DialogDescription>
+        <DialogBody>
+          <DialogDescription>
+            Are you sure you want to logout from your account{' '}
+            <strong>{user.email}</strong>?
+          </DialogDescription>
+        </DialogBody>
         <DialogFooter>
           <Button
             variant='destructive'
@@ -172,13 +176,13 @@ export function Navbar() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  asChild
                   className={navigationMenuTriggerStyle()}
                   data-active={isActive('/')}
+                  render={
+                    <Link href='/' aria-current={isActive('/') ? 'page' : undefined} />
+                  }
                 >
-                  <Link href='/' aria-current={isActive('/') ? 'page' : undefined}>
-                    Home
-                  </Link>
+                  Home
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
@@ -196,26 +200,23 @@ export function Navbar() {
                   <ul className='grid w-150 gap-2 p-2 md:grid-cols-2'>
                     {portfolioLinks.map((link) => (
                       <li key={link.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            href={link.href}
-                            data-active={isActive(link.href)}
-                            aria-current={isActive(link.href) ? 'page' : undefined}
-                            className='block select-none space-y-1 rounded-md p-3 h-full
-                              leading-none no-underline outline-none transition-colors
-                              hover:bg-accent hover:text-accent-foreground focus:bg-accent
-                              focus:text-accent-foreground'
+                        <NavigationMenuLink
+                          data-active={isActive(link.href)}
+                          aria-current={isActive(link.href) ? 'page' : undefined}
+                          className='h-full flex-col items-start gap-1 p-3 select-none
+                            leading-none no-underline'
+                          closeOnClick
+                          render={<Link href={link.href} />}
+                        >
+                          <div className='text-sm font-medium leading-none'>
+                            {link.label}
+                          </div>
+                          <p
+                            className='line-clamp-2 text-sm leading-snug
+                              text-muted-foreground'
                           >
-                            <div className='text-sm font-medium leading-none'>
-                              {link.label}
-                            </div>
-                            <p
-                              className='line-clamp-2 text-sm leading-snug
-                                text-muted-foreground'
-                            >
-                              {link.description}
-                            </p>
-                          </Link>
+                            {link.description}
+                          </p>
                         </NavigationMenuLink>
                       </li>
                     ))}
@@ -225,48 +226,41 @@ export function Navbar() {
 
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  asChild
                   className={navigationMenuTriggerStyle()}
                   data-active={isActive('/about')}
+                  render={
+                    <Link
+                      href='/about'
+                      aria-current={isActive('/about') ? 'page' : undefined}
+                    />
+                  }
                 >
-                  <Link
-                    href='/about'
-                    aria-current={isActive('/about') ? 'page' : undefined}
-                  >
-                    About
-                  </Link>
+                  About
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  asChild
                   className={navigationMenuTriggerStyle()}
                   data-active={isActive('/contact')}
+                  render={
+                    <Link
+                      href='/contact'
+                      aria-current={isActive('/contact') ? 'page' : undefined}
+                    />
+                  }
                 >
-                  <Link
-                    href='/contact'
-                    aria-current={isActive('/contact') ? 'page' : undefined}
-                  >
-                    Contact
-                  </Link>
+                  Contact
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               {/* {user && (
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    asChild
                     className={navigationMenuTriggerStyle()}
-                    data-active={isActive('/admin')}
-                  >
-                    <Link
-                      href='/admin'
-                      aria-current={isActive('/admin') ? 'page' : undefined}
-                    >
+                    data-active={isActive('/admin')} render={<Link href='/admin' aria-current={isActive('/admin') ? 'page' : undefined} />}>
                       Admin
-                    </Link>
-                  </NavigationMenuLink>
+                    </NavigationMenuLink>
                 </NavigationMenuItem>
               )} */}
             </NavigationMenuList>
@@ -279,16 +273,14 @@ export function Navbar() {
         {/* Mobile Navigation - Sheet */}
         <div className='lg:hidden'>
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant='outline' size='icon'>
-                <Menu className='h-6 w-6' />
-                <span className='sr-only'>Toggle menu</span>
-              </Button>
+            <SheetTrigger render={<Button variant='outline' size='icon' />}>
+              <Menu className='h-6 w-6' />
+              <span className='sr-only'>Toggle menu</span>
             </SheetTrigger>
             <SheetContent side='right' className='w-75 sm:w-100'>
               <SheetHeader>
                 <SheetTitle>
-                  <Logo onClick={() => setOpen(false)} />
+                  <Logo className='text-lg' onClick={() => setOpen(false)} />
                 </SheetTitle>
               </SheetHeader>
               <div className='flex flex-col gap-6'>
@@ -296,19 +288,18 @@ export function Navbar() {
                   <Button
                     variant={isActive('/') ? 'default' : 'ghost'}
                     className='w-1/2'
-                    asChild
+                    nativeButton={false}
+                    render={<Link href='/' onClick={() => setOpen(false)} />}
                   >
-                    <Link href='/' onClick={() => setOpen(false)}>
-                      Home
-                    </Link>
+                    Home
                   </Button>
 
-                  <Accordion type='single' collapsible className='w-1/2'>
+                  <Accordion className='w-1/2'>
                     <AccordionItem value='portfolio' className='border-0'>
                       <AccordionTrigger
-                        className='justify-center hover:bg-accent
-                          hover:text-accent-foreground py-2 px-4 rounded-md
-                          hover:no-underline'
+                        className='items-center justify-center gap-1 rounded-md px-4 py-2
+                          hover:bg-accent hover:text-accent-foreground hover:no-underline
+                          **:data-[slot=accordion-trigger-icon]:ml-0'
                       >
                         Portfolio
                       </AccordionTrigger>
@@ -320,11 +311,12 @@ export function Navbar() {
                               variant={isActive(link.href) ? 'default' : 'ghost'}
                               size='sm'
                               className='w-full justify-end'
-                              asChild
+                              nativeButton={false}
+                              render={
+                                <Link href={link.href} onClick={() => setOpen(false)} />
+                              }
                             >
-                              <Link href={link.href} onClick={() => setOpen(false)}>
-                                {link.label}
-                              </Link>
+                              {link.label}
                             </Button>
                           ))}
                         </div>
@@ -335,32 +327,26 @@ export function Navbar() {
                   <Button
                     variant={isActive('/about') ? 'default' : 'ghost'}
                     className='w-1/2'
-                    asChild
+                    nativeButton={false}
+                    render={<Link href='/about' onClick={() => setOpen(false)} />}
                   >
-                    <Link href='/about' onClick={() => setOpen(false)}>
-                      About
-                    </Link>
+                    About
                   </Button>
 
                   <Button
                     variant={isActive('/contact') ? 'default' : 'ghost'}
                     className='w-1/2'
-                    asChild
+                    nativeButton={false}
+                    render={<Link href='/contact' onClick={() => setOpen(false)} />}
                   >
-                    <Link href='/contact' onClick={() => setOpen(false)}>
-                      Contact
-                    </Link>
+                    Contact
                   </Button>
                   {/* {user && (
                     <Button
                       variant={isActive('/admin') ? 'default' : 'ghost'}
-                      className='w-1/2'
-                      asChild
-                    >
-                      <Link href='/admin' onClick={() => setOpen(false)}>
+                      className='w-1/2' nativeButton={false} render={<Link href='/admin' onClick={() => setOpen(false)} />}>
                         Admin
-                      </Link>
-                    </Button>
+                      </Button>
                   )} */}
 
                   {user ? (

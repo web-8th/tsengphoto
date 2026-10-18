@@ -5,13 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/animate-ui/components/dialog';
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -108,61 +110,69 @@ export function VideoUploadDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='youtube_url'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>YouTube URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='https://www.youtube.com/watch?v=...' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex min-h-0 flex-1 flex-col'
+          >
+            <DialogBody>
+              <FormField
+                control={form.control}
+                name='youtube_url'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>YouTube URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder='https://www.youtube.com/watch?v=...'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title (optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder='Custom video title' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder='Brief description about this video'
+                        rows={3}
+                        className='max-h-50'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.formState.errors.root && (
+                <div className='text-sm text-destructive'>
+                  {form.formState.errors.root.message}
+                </div>
               )}
-            />
+            </DialogBody>
 
-            <FormField
-              control={form.control}
-              name='title'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title (optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='Custom video title' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder='Brief description about this video'
-                      rows={3}
-                      className='max-h-50'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {form.formState.errors.root && (
-              <div className='text-sm text-destructive'>
-                {form.formState.errors.root.message}
-              </div>
-            )}
-
-            <div className='flex gap-2 justify-end'>
+            <DialogFooter>
               <Button
                 type='button'
                 variant='outline'
@@ -181,7 +191,7 @@ export function VideoUploadDialog({
                   'Add Video'
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

@@ -2,11 +2,12 @@
 
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/animate-ui/components/dialog';
+} from '@/components/ui/dialog';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useToast } from '@/hooks/use-toast';
 import { collectionsQueryKeys } from '@/lib/queries/collections';
@@ -77,12 +78,12 @@ export function CollectionUploadDialog({
           <DialogDescription>Upload new images to this collection.</DialogDescription>
         </DialogHeader>
 
-        <div className='mt-4'>
+        <DialogBody>
           <ImageUploader
             onUploadComplete={handleUploadComplete}
             onUploadError={handleUploadError}
           />
-        </div>
+        </DialogBody>
       </DialogContent>
     </Dialog>
   );

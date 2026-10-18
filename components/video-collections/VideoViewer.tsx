@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent } from '@/components/animate-ui/components/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Video as VideoType } from '@/lib/types';
 import { generateYouTubeEmbedUrl } from '@/services/videos.service';
 

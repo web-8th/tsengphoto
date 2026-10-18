@@ -5,7 +5,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui';
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib';

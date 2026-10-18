@@ -1,14 +1,15 @@
 'use client';
 
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
-import { Button } from '@/components/animate-ui/components/button';
+import { Checkbox } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/animate-ui/components/dialog';
+} from '@/components/ui/dialog';
 import { CoverImageUploader } from '@/components/CoverImageUploader';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -358,7 +359,7 @@ export function CollectionForm({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-h-[70vh] sm:max-h-[90vh] overflow-y-auto'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {mode === 'add' ? 'Add Collection' : 'Edit Collection'}
@@ -366,385 +367,399 @@ export function CollectionForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* Title */}
-            <FormField
-              control={form.control}
-              name='title'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleTitleChange(e.target.value);
-                      }}
-                      placeholder='A memorable event title'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Slug */}
-            <FormField
-              control={form.control}
-              name='slug'
-              render={({ field }) => (
-                <FormItem className='flex-1'>
-                  <FormLabel>
-                    Slug
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className='size-4 text-muted-foreground' />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        A URL-friendly version of the collection title. It should be
-                        lowercase, with words separated by hyphens.
-                      </TooltipContent>
-                    </Tooltip>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='user-friendly-readable-slug' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Type & Group */}
-            <div className='flex flex-col sm:flex-row w-full gap-4'>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex min-h-0 flex-1 flex-col'
+          >
+            <DialogBody>
+              {/* Title */}
               <FormField
                 control={form.control}
-                name='type'
+                name='title'
                 render={({ field }) => (
-                  <FormItem className='flex-1'>
-                    <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select type' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value='event'>Event</SelectItem>
-                        <SelectItem value='series'>Series</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleTitleChange(e.target.value);
+                        }}
+                        placeholder='A memorable event title'
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Slug */}
               <FormField
                 control={form.control}
-                name='collection_group_id'
+                name='slug'
                 render={({ field }) => (
                   <FormItem className='flex-1'>
                     <FormLabel>
-                      Group (optional){' '}
+                      Slug
                       <Tooltip>
                         <TooltipTrigger>
                           <Info className='size-4 text-muted-foreground' />
                         </TooltipTrigger>
                         <TooltipContent>
-                          Group collections together for better organization
+                          A URL-friendly version of the collection title. It should be
+                          lowercase, with words separated by hyphens.
                         </TooltipContent>
                       </Tooltip>
                     </FormLabel>
-                    <Popover open={groupPopoverOpen} onOpenChange={setGroupPopoverOpen}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant='outline'
-                            role='combobox'
-                            className={cn(
-                              'w-full justify-between',
-                              !selectedGroupId && 'text-muted-foreground'
-                            )}
-                          >
-                            {selectedGroupId
-                              ? groups.find((g) => g.id === selectedGroupId)?.name
-                              : 'No group'}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className='p-0'
-                        align='start'
-                        style={{ width: 'var(--radix-popover-trigger-width)' }}
-                        onWheel={(e) => e.stopPropagation()}
-                      >
-                        <Command>
-                          <CommandInput
-                            placeholder='Search group...'
-                            value={groupSearchQuery}
-                            onValueChange={setGroupSearchQuery}
-                          />
-                          <CommandList>
-                            <CommandEmpty>No group found.</CommandEmpty>
-
-                            {/* Add Group Action */}
-                            <CommandGroup>
-                              <CommandItem onSelect={handleAddGroup}>
-                                <Plus className='mr-2 h-4 w-4' />
-                                Add Group
-                              </CommandItem>
-                            </CommandGroup>
-
-                            <CommandSeparator />
-
-                            {/* No Group Option */}
-                            <CommandGroup>
-                              <CommandItem
-                                value='no-grouping'
-                                onSelect={() => {
-                                  field.onChange('');
-                                  setGroupPopoverOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    'mr-2 h-4 w-4',
-                                    !selectedGroupId ? 'opacity-100' : 'opacity-0'
-                                  )}
-                                />
-                                No Group
-                              </CommandItem>
-                            </CommandGroup>
-
-                            <CommandSeparator />
-
-                            {/* Grouping List */}
-                            <CommandGroup heading='Groups'>
-                              {groups.map((group) => (
-                                <CommandItem
-                                  key={group.id}
-                                  value={group.name}
-                                  onSelect={() => {
-                                    field.onChange(group.id);
-                                    setGroupPopoverOpen(false);
-                                  }}
-                                  className='flex items-center justify-between'
-                                >
-                                  <div className='flex items-center flex-1'>
-                                    <Check
-                                      className={cn(
-                                        'mr-2 h-4 w-4',
-                                        selectedGroupId === group.id
-                                          ? 'opacity-100'
-                                          : 'opacity-0'
-                                      )}
-                                    />
-                                    <span>{group.name}</span>
-                                  </div>
-                                  <Button
-                                    type='button'
-                                    variant='destructive'
-                                    size='icon'
-                                    className='h-6 w-6 ml-2'
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onDeleteGroup?.(group.id);
-                                    }}
-                                  >
-                                    <Trash2 className='size-3' />
-                                  </Button>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <Input {...field} placeholder='user-friendly-readable-slug' />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
 
-            {/* Date */}
-            <FormField
-              control={form.control}
-              name='date'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Date (optional)</FormLabel>
-                  <div className='flex gap-2 w-full'>
-                    <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                      <PopoverTrigger asChild className='flex-1'>
+              {/* Type & Group */}
+              <div className='flex flex-col sm:flex-row w-full gap-4'>
+                <FormField
+                  control={form.control}
+                  name='type'
+                  render={({ field }) => (
+                    <FormItem className='flex-1'>
+                      <FormLabel>Type</FormLabel>
+                      <Select
+                        items={[
+                          { value: 'event', label: 'Event' },
+                          { value: 'series', label: 'Series' },
+                        ]}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Button
-                            variant='outline'
-                            className={cn(
-                              'w-full',
-                              !dateValue && 'text-muted-foreground'
-                            )}
+                          <SelectTrigger className='w-full'>
+                            <SelectValue placeholder='Select type' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='event'>Event</SelectItem>
+                          <SelectItem value='series'>Series</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='collection_group_id'
+                  render={({ field }) => (
+                    <FormItem className='flex-1'>
+                      <FormLabel>
+                        Group (optional){' '}
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className='size-4 text-muted-foreground' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Group collections together for better organization
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      <Popover open={groupPopoverOpen} onOpenChange={setGroupPopoverOpen}>
+                        <FormControl>
+                          <PopoverTrigger
+                            render={
+                              <Button
+                                variant='outline'
+                                role='combobox'
+                                className={cn(
+                                  'w-full justify-between',
+                                  !selectedGroupId && 'text-muted-foreground'
+                                )}
+                              />
+                            }
+                          >
+                            {selectedGroupId
+                              ? groups.find((g) => g.id === selectedGroupId)?.name
+                              : 'No group'}
+                          </PopoverTrigger>
+                        </FormControl>
+                        <PopoverContent
+                          className='p-0'
+                          align='start'
+                          style={{ width: 'var(--radix-popover-trigger-width)' }}
+                          onWheel={(e) => e.stopPropagation()}
+                        >
+                          <Command>
+                            <CommandInput
+                              placeholder='Search group...'
+                              value={groupSearchQuery}
+                              onValueChange={setGroupSearchQuery}
+                            />
+                            <CommandList>
+                              <CommandEmpty>No group found.</CommandEmpty>
+
+                              {/* Add Group Action */}
+                              <CommandGroup>
+                                <CommandItem onSelect={handleAddGroup}>
+                                  <Plus className='mr-2 h-4 w-4' />
+                                  Add Group
+                                </CommandItem>
+                              </CommandGroup>
+
+                              <CommandSeparator />
+
+                              {/* No Group Option */}
+                              <CommandGroup>
+                                <CommandItem
+                                  value='no-grouping'
+                                  onSelect={() => {
+                                    field.onChange('');
+                                    setGroupPopoverOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      !selectedGroupId ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  No Group
+                                </CommandItem>
+                              </CommandGroup>
+
+                              <CommandSeparator />
+
+                              {/* Grouping List */}
+                              <CommandGroup heading='Groups'>
+                                {groups.map((group) => (
+                                  <CommandItem
+                                    key={group.id}
+                                    value={group.name}
+                                    onSelect={() => {
+                                      field.onChange(group.id);
+                                      setGroupPopoverOpen(false);
+                                    }}
+                                    className='flex items-center justify-between'
+                                  >
+                                    <div className='flex items-center flex-1'>
+                                      <Check
+                                        className={cn(
+                                          'mr-2 h-4 w-4',
+                                          selectedGroupId === group.id
+                                            ? 'opacity-100'
+                                            : 'opacity-0'
+                                        )}
+                                      />
+                                      <span>{group.name}</span>
+                                    </div>
+                                    <Button
+                                      type='button'
+                                      variant='destructive'
+                                      size='icon'
+                                      className='h-6 w-6 ml-2'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteGroup?.(group.id);
+                                      }}
+                                    >
+                                      <Trash2 className='size-3' />
+                                    </Button>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Date */}
+              <FormField
+                control={form.control}
+                name='date'
+                render={({ field }) => (
+                  <FormItem className='flex flex-col'>
+                    <FormLabel>Date (optional)</FormLabel>
+                    <div className='flex gap-2 w-full'>
+                      <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                        <FormControl>
+                          <PopoverTrigger
+                            className='flex-1'
+                            render={
+                              <Button
+                                variant='outline'
+                                className={cn(
+                                  'w-full',
+                                  !dateValue && 'text-muted-foreground'
+                                )}
+                              />
+                            }
                           >
                             {dateValue ? format(dateValue, 'PPP') : 'Pick a date'}
                             <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                          </Button>
+                          </PopoverTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className='w-auto p-0' align='start'>
-                        <Calendar
-                          mode='single'
-                          selected={field.value ?? undefined}
-                          onSelect={(date) => {
-                            field.onChange(date ?? undefined);
+                        <PopoverContent className='w-auto p-0' align='start'>
+                          <Calendar
+                            mode='single'
+                            selected={field.value ?? undefined}
+                            onSelect={(date) => {
+                              field.onChange(date ?? undefined);
+                              setDatePopoverOpen(false);
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {dateValue && (
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          onClick={() => {
+                            field.onChange(undefined);
                             setDatePopoverOpen(false);
                           }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {dateValue && (
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        onClick={() => {
-                          field.onChange(undefined);
-                          setDatePopoverOpen(false);
+                        >
+                          <X className='size-5' />
+                        </Button>
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Location */}
+              <FormField
+                control={form.control}
+                name='location'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location (optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder='Kelowna, BC' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder='A memorable event description...'
+                        rows={3}
+                        className='max-h-50'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Google Drive Link */}
+              <FormField
+                control={form.control}
+                name='drive_link'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Google Drive Folder (optional)
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className='size-4 text-muted-foreground' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Link to a Google Drive folder to display additional images
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder='https://drive.google.com/drive/folders/...'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Cover Image */}
+              <FormField
+                control={form.control}
+                name='cover_image_url'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CoverImageUploader
+                        value={field.value}
+                        uploadId={coverImageId}
+                        onChange={(data) => {
+                          form.setValue('cover_image_url', data.url);
+                          if (data.uploadId) {
+                            form.setValue('cover_image_id', data.uploadId);
+                            pendingCoverImageIdRef.current = data.uploadId; // Track for cleanup
+                          }
                         }}
-                      >
-                        <X className='size-5' />
-                      </Button>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
+                        onRemove={() => {
+                          form.setValue('cover_image_url', '');
+                          form.setValue('cover_image_id', '');
+                          pendingCoverImageIdRef.current = null; // Clear pending tracking
+                        }}
+                        onUploadingChange={setIsCoverImageUploading}
+                        mode={mode}
+                        collectionId={collection?.id}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Published */}
+              <FormField
+                control={form.control}
+                name='is_published'
+                render={({ field }) => (
+                  <FormItem className='flex flex-row items-center'>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className='rounded'
+                      />
+                    </FormControl>
+                    <div className='space-y-1 leading-none'>
+                      <FormLabel>Published</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Root Error */}
+              {form.formState.errors.root && (
+                <div className='text-sm text-destructive'>
+                  {form.formState.errors.root.message}
+                </div>
               )}
-            />
+            </DialogBody>
 
-            {/* Location */}
-            <FormField
-              control={form.control}
-              name='location'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location (optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder='Kelowna, BC' />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder='A memorable event description...'
-                      rows={3}
-                      className='max-h-50'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Google Drive Link */}
-            <FormField
-              control={form.control}
-              name='drive_link'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Google Drive Folder (optional)
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className='size-4 text-muted-foreground' />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Link to a Google Drive folder to display additional images
-                      </TooltipContent>
-                    </Tooltip>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder='https://drive.google.com/drive/folders/...'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Cover Image */}
-            <FormField
-              control={form.control}
-              name='cover_image_url'
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <CoverImageUploader
-                      value={field.value}
-                      uploadId={coverImageId}
-                      onChange={(data) => {
-                        form.setValue('cover_image_url', data.url);
-                        if (data.uploadId) {
-                          form.setValue('cover_image_id', data.uploadId);
-                          pendingCoverImageIdRef.current = data.uploadId; // Track for cleanup
-                        }
-                      }}
-                      onRemove={() => {
-                        form.setValue('cover_image_url', '');
-                        form.setValue('cover_image_id', '');
-                        pendingCoverImageIdRef.current = null; // Clear pending tracking
-                      }}
-                      onUploadingChange={setIsCoverImageUploading}
-                      mode={mode}
-                      collectionId={collection?.id}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Published */}
-            <FormField
-              control={form.control}
-              name='is_published'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center'>
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className='rounded'
-                    >
-                      <CheckboxIndicator />
-                    </Checkbox>
-                  </FormControl>
-                  <div className='space-y-1 leading-none'>
-                    <FormLabel>Published</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            {/* Root Error */}
-            {form.formState.errors.root && (
-              <div className='text-sm text-destructive'>
-                {form.formState.errors.root.message}
-              </div>
-            )}
-
-            {/* Buttons */}
-            <div className='flex gap-2 justify-end'>
+            <DialogFooter>
               <Button
                 type='button'
                 variant='outline'
@@ -775,7 +790,7 @@ export function CollectionForm({
                   'Update'
                 )}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
@@ -790,7 +805,7 @@ export function CollectionForm({
               create a group for a club, or a collection series you took in Japan.
             </DialogDescription>
           </DialogHeader>
-          <div>
+          <DialogBody>
             <Input
               placeholder='Enter group name'
               value={newGroupName}
@@ -804,7 +819,7 @@ export function CollectionForm({
             <Text variant='caption' className='mt-1 text-destructive'>
               {createGroupMutation.error?.message}
             </Text>
-          </div>
+          </DialogBody>
           <DialogFooter>
             <Button
               type='button'

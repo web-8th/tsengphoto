@@ -1,11 +1,7 @@
 'use client';
-import { Button } from '@/components/animate-ui/components/button';
-import { Dialog, DialogClose } from '@/components/animate-ui/components/dialog';
-import {
-  DialogContent as DialogContentPrimitive,
-  DialogOverlay as DialogOverlayPrimitive,
-  DialogPortal as DialogPortalPrimitive,
-} from '@/components/animate-ui/primitives/radix/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogOverlay, DialogPortal } from '@/components/ui/dialog';
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
 import { fetchImage } from '@/utils/google-drive';
 import { Download, X } from 'lucide-react';
@@ -39,11 +35,9 @@ export function ImageViewer({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogPortalPrimitive>
-        <DialogOverlayPrimitive
-          className='fixed inset-0 z-50 bg-black/80 backdrop-blur-xs'
-        />
-        <DialogContentPrimitive
+      <DialogPortal>
+        <DialogOverlay className='bg-black/80' />
+        <DialogPrimitive.Popup
           className='w-full sm:max-w-[min(95vw,calc(95vh*16/9))] h-auto p-0
             overflow-hidden bg-transparent border-0 shadow-none fixed top-[50%] left-[50%]
             z-50 translate-x-[-50%] translate-y-[-50%]'
@@ -55,10 +49,8 @@ export function ImageViewer({
                   <Download className='size-5' />
                 </Button>
               )}
-              <DialogClose asChild>
-                <Button variant='outline' size='icon'>
-                  <X className='size-5' />
-                </Button>
+              <DialogClose render={<Button variant='outline' size='icon' />}>
+                <X className='size-5' />
               </DialogClose>
             </div>
           </div>
@@ -69,8 +61,8 @@ export function ImageViewer({
               images={images}
               autoplayDelay={0}
               itemsToShow={1}
+              btnVariant='outline'
               navigation='side-center'
-              btnVariant='secondary'
               showDots={false}
               fullWidth={true}
               objectFit='contain'
@@ -78,8 +70,8 @@ export function ImageViewer({
               containerClassName='aspect-video max-h-[90vh]'
             />
           )}
-        </DialogContentPrimitive>
-      </DialogPortalPrimitive>
+        </DialogPrimitive.Popup>
+      </DialogPortal>
     </Dialog>
   );
 }

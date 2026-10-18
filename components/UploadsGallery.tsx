@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/animate-ui/components/button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import {
   Skeleton,
   Spinner,
 } from '@/components/ui';
-import { Checkbox, CheckboxIndicator } from '@/components/animate-ui/components';
+import { Checkbox } from '@/components/ui';
 import { EmptyState } from '@/components/EmptyState';
 import { Text } from '@/components/Text';
 import { Download, ImageOff, Trash2 } from 'lucide-react';
@@ -176,9 +176,7 @@ export function UploadsGallery({
                 checked={selectedIds.size === uploads.length && uploads.length > 0}
                 onCheckedChange={handleSelectAll}
                 disabled={bulkDeleteMutation.isPending}
-              >
-                <CheckboxIndicator />
-              </Checkbox>
+              />
               <Text variant='bd-sm'>Select All</Text>
             </label>
             {selectedIds.size > 0 && (
@@ -229,10 +227,8 @@ export function UploadsGallery({
                         handleSelectOne(upload.id, checked as boolean)
                       }
                       disabled={bulkDeleteMutation.isPending}
-                      variant='overlay'
-                    >
-                      <CheckboxIndicator />
-                    </Checkbox>
+                      className='bg-background/80 backdrop-blur-sm'
+                    />
                   </div>
                   <div className='absolute top-2 right-2 z-10'>
                     <Button

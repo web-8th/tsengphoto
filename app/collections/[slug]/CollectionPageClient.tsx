@@ -9,16 +9,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/animate-ui/components/alert-dialog';
-import { Button } from '@/components/animate-ui/components/button';
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/animate-ui/components/dialog';
-import { Progress } from '@/components/animate-ui/components/radix/progress';
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { CollectionUploadDialog } from '@/components/collections/CollectionUploadDialog';
 import { EmptyState } from '@/components/EmptyState';
 import { PageLoader } from '@/components/PageLoader';
@@ -522,8 +524,8 @@ export default function CollectionPageClient({
                   : "Your download is in progress. Feel free to close this dialog or switch tabs — just don't close or navigate away from this page."}
             </DialogDescription>
           </DialogHeader>
-          <div className='space-y-4'>
-            {!downloadComplete && (
+          {!downloadComplete && (
+            <DialogBody>
               <div className='space-y-2'>
                 {isZipping ? (
                   <div
@@ -551,15 +553,13 @@ export default function CollectionPageClient({
                   </>
                 )}
               </div>
-            )}
-            {downloadComplete && (
-              <div
-                className={`flex justify-end pt-2 fade-in-from-bottom ${getDelayClass(3)}`}
-              >
-                <Button onClick={handleCloseDownloadDialog}>Close</Button>
-              </div>
-            )}
-          </div>
+            </DialogBody>
+          )}
+          {downloadComplete && (
+            <DialogFooter className={`fade-in-from-bottom ${getDelayClass(3)}`}>
+              <Button onClick={handleCloseDownloadDialog}>Close</Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 

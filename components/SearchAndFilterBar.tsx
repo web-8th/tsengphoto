@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/animate-ui/components/';
+import { Button } from '@/components/ui';
 import {
   Select,
   SelectContent,
@@ -250,6 +250,13 @@ export function SearchAndFilterBar<T>({
           {/* Type Filter - Only show if available */}
           {availableTypes.length > 0 && onTypeFilterChange && (
             <Select
+              items={[
+                { value: 'all', label: 'All Types' },
+                ...availableTypes.map((type) => ({
+                  value: type,
+                  label: type.charAt(0).toUpperCase() + type.slice(1),
+                })),
+              ]}
               value={typeFilter || 'all'}
               onValueChange={(value) =>
                 onTypeFilterChange(value === 'all' ? null : value)
@@ -275,6 +282,10 @@ export function SearchAndFilterBar<T>({
           {/* Group Filter - Only show if available */}
           {availableGroups.length > 0 && onGroupFilterChange && (
             <Select
+              items={[
+                { value: 'all', label: 'All Groups' },
+                ...availableGroups.map((group) => ({ value: group, label: group })),
+              ]}
               value={groupFilter || 'all'}
               onValueChange={(value) =>
                 onGroupFilterChange(value === 'all' ? null : value)
