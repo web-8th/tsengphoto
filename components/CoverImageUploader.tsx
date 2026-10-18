@@ -262,7 +262,7 @@ export function CoverImageUploader({
           Cover Image
         </Text>
         <div
-          className='relative w-full aspect-video rounded-lg overflow-hidden border group'
+          className='relative w-full aspect-video overflow-hidden border group'
         >
           <OptimizedImage
             src={value}
@@ -332,7 +332,7 @@ export function CoverImageUploader({
         <div
           {...getRootProps()}
           className={cn(
-            `border-2 border-dashed rounded p-6 text-center cursor-pointer
+            `border-2 border-dashed p-6 text-center cursor-pointer
             transition-colors`,
             isDragActive
               ? 'border-primary bg-primary/5'
