@@ -75,10 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang='en'
-      className={cn(fontSans.variable, fontMono.variable)}
-    >
+    <html lang='en' className={cn(fontSans.variable, fontMono.variable)}>
       <body className='antialiased'>
         <ImageOptimizationProvider>
           <AuthProvider>
