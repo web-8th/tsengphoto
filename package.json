@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint",
     "pull-remote-data": "supabase db dump -f data.sql --data-only && supabase db reset && psql postgresql://postgres:postgres@localhost:54322/postgres -f data.sql",
     "start": "next start",
